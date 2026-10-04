@@ -39,7 +39,7 @@ export const modularPage = {
         link: 'Primary-side pump stations',
         image: 'sgPump' as const,
         alt: 'Grey pump-station enclosure with two doors open, showing a stainless storage tank and flanged pipe ends.',
-        caption: 'Photograph. Enclosed pump station with internal storage tank, built for a Singapore project.',
+        caption: 'Photograph, background removed. Enclosed pump station with internal storage tank, built for a Singapore project.',
       },
       {
         name: 'Base-frame compute block',
@@ -48,7 +48,7 @@ export const modularPage = {
         link: '2.5 MW project reference',
         image: 'usIntegration' as const,
         alt: 'A row of liquid-cooled racks and a frame-mounted CDU on a common black base frame.',
-        caption: 'Photograph. Racks and centralized CDU on a common base frame, during factory integration.',
+        caption: 'Photograph, background removed. Racks and centralized CDU on a common base frame, during factory integration.',
       },
     ],
   },

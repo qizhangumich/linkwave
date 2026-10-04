@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import Logo from './Logo.astro';
+import { studio } from '@/content/imageMeta';
 
 interface Props {
   src: ImageMetadata;
@@ -34,17 +35,28 @@ const {
   class: cls,
 } = Astro.props;
 
+// Studio images are equipment cut out onto a flat backdrop: always shown whole, never cropped.
+const studioMeta = studio.get(src);
+const contain = fit === 'contain' || !!studioMeta;
+const native = src.width / src.height;
+const nativeRatio = `${src.width} / ${src.height}`;
+const studioMobile = native > 4 / 3 ? '4 / 3' : nativeRatio;
+
 const widths = [480, 768, 1080, 1440, 1920, 2560].filter((w) => w <= src.width);
 if (!widths.includes(src.width) && src.width < 2560) widths.push(src.width);
 ---
 
 <figure class:list={['figure', cls]}>
   <div
-    class:list={['figure__frame', fit === 'contain' && 'figure__frame--contain']}
+    class:list={[
+      'figure__frame',
+      contain && 'figure__frame--contain',
+      studioMeta && 'figure__frame--studio',
+    ]}
     style={{
-      '--ratio': ratio ?? `${src.width} / ${src.height}`,
-      '--ratio-mobile': mobileRatio ?? ratio ?? `${src.width} / ${src.height}`,
-      '--position': position,
+      '--ratio': ratio ?? nativeRatio,
+      '--ratio-mobile': studioMeta ? studioMobile : (mobileRatio ?? ratio ?? nativeRatio),
+      '--position': studioMeta?.anchor ?? position,
     }}
   >
     <Image
@@ -85,6 +97,9 @@ if (!widths.includes(src.width) && src.width < 2560) widths.push(src.width);
   }
   .figure__frame--contain :global(img) {
     object-fit: contain;
+  }
+  .figure__frame--studio {
+    background: var(--surface-tertiary);
   }
   /* The mark is an overlay, not part of the photograph: the image files stay unaltered. */
   .figure__mark {

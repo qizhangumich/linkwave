@@ -334,7 +334,7 @@ export const products: Product[] = [
     hero: {
       src: manifolds,
       alt: 'Two polished stainless-steel rack manifolds with rows of threaded ports.',
-      caption: 'Photograph. Stainless-steel rack manifolds before installation.',
+      caption: 'Photograph, background removed. Stainless-steel rack manifolds before installation.',
       kind: 'photograph',
     },
     mobileFocus: '50% 50%',

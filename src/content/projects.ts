@@ -36,14 +36,14 @@ export const projects: Project[] = [
       src: usIntegration,
       alt: 'A row of open liquid-cooled racks on a black base frame, with a white frame-mounted CDU at the near end showing pumps, expansion vessels and stainless piping.',
       caption:
-        'Photograph. Racks and centralized CDU on a common base frame, during factory integration before shipment to the United States.',
+        'Photograph, background removed. Racks and centralized CDU on a common base frame, during factory integration before shipment to the United States.',
       kind: 'photograph',
     },
     gallery: [
       {
         src: usSwitchgear,
         alt: 'White switchgear cabinet with a touch panel at the end of the rack row, mounted on the same base frame.',
-        caption: 'Photograph. Switchgear cabinet and control panel at the opposite end of the rack row.',
+        caption: 'Photograph, background removed. Switchgear cabinet and control panel at the opposite end of the rack row.',
         kind: 'photograph',
       },
     ],
@@ -82,7 +82,7 @@ export const projects: Project[] = [
     heroImage: {
       src: usPump,
       alt: 'White enclosed pump station with a door-mounted operator panel, on a transport frame, with a V-shaped dry-cooler coil visible behind it.',
-      caption: 'Photograph. Enclosed pump station with dry cooler, at the factory before shipment.',
+      caption: 'Photograph, background removed. Enclosed pump station with dry cooler, at the factory before shipment.',
       kind: 'photograph',
     },
     gallery: [],
@@ -140,7 +140,7 @@ export const projects: Project[] = [
       {
         src: sgPump,
         alt: 'Grey pump-station enclosure on timber bearers with two doors open, showing a stainless storage tank and large flanged pipe ends.',
-        caption: 'Photograph. Enclosure with the 1 m³ stainless storage tank visible, at the factory.',
+        caption: 'Photograph, background removed. Enclosure with the 1 m³ stainless storage tank visible, at the factory.',
         kind: 'photograph',
       },
     ],

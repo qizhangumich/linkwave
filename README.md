@@ -44,6 +44,15 @@ Desktop and mobile are composed separately (spec §39): the phone layout reorder
 chapters, drops secondary copy, turns the architecture diagram into a vertical journey and
 spec tables into data blocks, and adds a sticky "Talk to an Engineer" bar.
 
+## Images
+
+`src/assets/source-originals/` holds the untouched source images. `src/assets/images/` holds the
+versions the site uses: upscaled 2x with Real-ESRGAN, and, for equipment shots, cut out of their
+surroundings (BiRefNet mask) and set on the flat `--surface-tertiary` backdrop with a soft shadow.
+Those are registered in `src/content/imageMeta.ts` and always displayed whole. Installed-site
+and close-up detail photographs keep their original framing. Drawings and plots are not AI-processed.
+Captions say "background removed" where it applies.
+
 ## Deployment
 
 Pushes to `master` deploy to Vercel (`vercel.json` sets the Astro preset). Set
