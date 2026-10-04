@@ -11,6 +11,16 @@ export const site = {
    * publish only projects with `publicationApproved: true`.
    */
   previewUnapprovedProjects: true,
+  /**
+   * Enquiry form delivery. Submissions are emailed by FormSubmit (formsubmit.co).
+   * `PUBLIC_RFQ_ENDPOINT` overrides `endpoint` if a different service is used later.
+   */
+  rfq: {
+    endpoint: 'https://formsubmit.co/jeremy@linkwave.one',
+    subject: 'LINKWAVE website enquiry',
+    sentPath: '/contact/sent/',
+    maxUploadMb: 10,
+  },
 } as const;
 
 export const cta = {

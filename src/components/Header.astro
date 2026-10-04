@@ -1,11 +1,12 @@
 ---
 import Button from './Button.astro';
+import Logo from './Logo.astro';
 import { cta, nav, site } from '@/content/site';
 ---
 
 <header class="header" data-header>
   <div class="container header__inner">
-    <a class="wordmark" href="/" aria-label={`${site.name} home`}>{site.name}</a>
+    <a class="wordmark" href="/" aria-label={`${site.name} home`}><Logo /></a>
 
     <nav class="header__nav" aria-label="Primary">
       <ul>
@@ -97,9 +98,7 @@ import { cta, nav, site } from '@/content/site';
     height: var(--header-h);
   }
   .wordmark {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
+    display: inline-flex;
     text-decoration: none;
   }
   .header__nav {

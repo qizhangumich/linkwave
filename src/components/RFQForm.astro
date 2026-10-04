@@ -1,7 +1,9 @@
 ---
 import Button from './Button.astro';
+import { site } from '@/content/site';
 
-const endpoint = import.meta.env.PUBLIC_RFQ_ENDPOINT ?? '';
+const endpoint = import.meta.env.PUBLIC_RFQ_ENDPOINT || site.rfq.endpoint;
+const sentUrl = new URL(site.rfq.sentPath, Astro.site).href;
 
 const projectTypes = ['AI Data Center', 'Hyperscale', 'HPC', 'Colocation', 'Cloud / GPU Cloud', 'Other'];
 const stages = ['Concept', 'Design', 'Procurement', 'Construction', 'Expansion'];
@@ -14,7 +16,21 @@ const architectures = [
 ];
 ---
 
-<form class="rfq" id="rfq" novalidate data-rfq data-endpoint={endpoint}>
+<form
+  class="rfq"
+  id="rfq"
+  novalidate
+  data-rfq
+  data-endpoint={endpoint}
+  data-max-mb={site.rfq.maxUploadMb}
+  action={endpoint}
+  method="post"
+  enctype="multipart/form-data"
+>
+  <input type="hidden" name="_subject" value={site.rfq.subject} />
+  <input type="hidden" name="_template" value="table" />
+  <input type="hidden" name="_captcha" value="false" />
+  <input type="hidden" name="_next" value={sentUrl} />
   <p class="small muted rfq__legend">Fields marked <span aria-hidden="true">*</span><span class="visually-hidden">with an asterisk</span> are required. Everything else is optional.</p>
 
   <div class="rfq__error-summary" role="alert" tabindex="-1" hidden data-error-summary></div>
@@ -121,7 +137,7 @@ const architectures = [
       aria-describedby="rfq-file-hint rfq-file-status"
     />
     <p class="field__hint" id="rfq-file-hint">
-      PDF, Office, DWG/DXF, ZIP or image. 25 MB maximum. Files are used only to prepare a response to this enquiry.
+      PDF, Office, DWG/DXF, ZIP or image. {site.rfq.maxUploadMb} MB maximum. Files are used only to prepare a response to this enquiry.
     </p>
     <p class="field__status" id="rfq-file-status" aria-live="polite"></p>
     <p class="field__error" id="rfq-file-error" hidden></p>
@@ -130,7 +146,7 @@ const architectures = [
   <!-- Spam protection without a puzzle: a hidden field people never see, plus a minimum time on page. -->
   <div class="rfq__trap" aria-hidden="true">
     <label for="rfq-website">Leave this field empty</label>
-    <input id="rfq-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    <input id="rfq-website" name="_honey" type="text" tabindex="-1" autocomplete="off" />
   </div>
 
   <div class="field field--check">
@@ -138,6 +154,9 @@ const architectures = [
     <label for="rfq-consent">
       I agree that LINKWAVE may use the information above to respond to this enquiry. *
     </label>
+    <p class="field__hint field__hint--consent">
+      Enquiries are delivered to LINKWAVE by email through FormSubmit, a third-party form service.
+    </p>
     <p class="field__error" id="rfq-consent-error" hidden></p>
   </div>
 
@@ -159,7 +178,8 @@ const architectures = [
   const form = document.querySelector<HTMLFormElement>('[data-rfq]');
   if (form) {
     const DRAFT_KEY = 'linkwave-rfq-draft';
-    const MAX_BYTES = 25 * 1024 * 1024;
+    const MAX_MB = Number(form.dataset.maxMb) || 10;
+    const MAX_BYTES = MAX_MB * 1024 * 1024;
     const loadedAt = Date.now();
     const summary = form.querySelector<HTMLElement>('[data-error-summary]')!;
     const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
@@ -171,7 +191,7 @@ const architectures = [
 
     type Field = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
     const fields = [...form.querySelectorAll<Field>('input, select, textarea')].filter(
-      (f) => f.name !== 'website',
+      (f) => !f.name.startsWith('_'),
     );
 
     if (window.matchMedia('(min-width: 62rem)').matches) details.open = true;
@@ -224,7 +244,7 @@ const architectures = [
       if (f.type === 'file') {
         const picked = (f as HTMLInputElement).files?.[0];
         return picked && picked.size > MAX_BYTES
-          ? `This file is ${(picked.size / 1048576).toFixed(1)} MB. Choose a file under 25 MB, or send a link in the description.`
+          ? `This file is ${(picked.size / 1048576).toFixed(1)} MB. Choose a file under ${MAX_MB} MB, or put a download link in the description.`
           : '';
       }
       if (f.type === 'checkbox') {
@@ -326,9 +346,26 @@ const architectures = [
       }
 
       setBusy(true);
+
+      // Attachments go through a standard form post, the documented route for file uploads.
+      // The service then redirects to the confirmation page.
+      if (file.files?.length) {
+        storage.clear();
+        form.submit();
+        return;
+      }
+
       try {
-        const response = await fetch(endpoint, { method: 'POST', body: new FormData(form) });
-        if (!response.ok) throw new Error(String(response.status));
+        const data = new FormData(form);
+        data.delete('attachment');
+        data.delete('_next');
+        const response = await fetch(endpoint.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: data,
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || String(result.success) !== 'true') throw new Error(String(response.status));
         finish(true);
       } catch {
         setBusy(false);
@@ -464,7 +501,8 @@ const architectures = [
   .field--check label {
     font-weight: 400;
   }
-  .field--check .field__error {
+  .field--check .field__error,
+  .field__hint--consent {
     grid-column: 2;
   }
 

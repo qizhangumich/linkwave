@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import Logo from './Logo.astro';
 
 interface Props {
   src: ImageMetadata;
@@ -14,6 +15,8 @@ interface Props {
   fit?: 'cover' | 'contain';
   sizes?: string;
   eager?: boolean;
+  /** Small LINKWAVE plate in the corner of the image. Off for drawings and plots. */
+  mark?: boolean;
   class?: string;
 }
 
@@ -27,6 +30,7 @@ const {
   fit = 'cover',
   sizes = '(min-width: 62rem) 60vw, 100vw',
   eager = false,
+  mark = fit === 'cover',
   class: cls,
 } = Astro.props;
 
@@ -52,12 +56,20 @@ if (!widths.includes(src.width) && src.width < 2560) widths.push(src.width);
       fetchpriority={eager ? 'high' : undefined}
       decoding={eager ? 'sync' : 'async'}
     />
+    {
+      mark && (
+        <span class="figure__mark" aria-hidden="true">
+          <Logo size="small" />
+        </span>
+      )
+    }
   </div>
   {caption && <figcaption class="figure__caption">{caption}</figcaption>}
 </figure>
 
 <style>
   .figure__frame {
+    position: relative;
     aspect-ratio: var(--ratio);
     overflow: hidden;
     background: var(--surface-tertiary);
@@ -73,6 +85,17 @@ if (!widths.includes(src.width) && src.width < 2560) widths.push(src.width);
   }
   .figure__frame--contain :global(img) {
     object-fit: contain;
+  }
+  /* The mark is an overlay, not part of the photograph: the image files stay unaltered. */
+  .figure__mark {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    padding: 0.5rem 0.625rem;
+    background: var(--surface-inverse);
+    color: var(--text-inverse);
+    --accent: var(--accent-on-inverse);
   }
   .figure__caption {
     margin-top: var(--space-3);

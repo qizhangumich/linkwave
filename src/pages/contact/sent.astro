@@ -1,0 +1,27 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+---
+
+<Base title="Enquiry received" stickyCta={false} noindex>
+  <section class="section">
+    <div class="container sent">
+      <p class="label">Enquiry received</p>
+      <h1 class="h1">Thank you. Your enquiry is with our engineering team.</h1>
+      <p class="lead">An engineer will review the details and reply to the email address you provided.</p>
+      <Button href="/" variant="secondary">Back to the homepage</Button>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+  }
+  .sent h1 {
+    max-width: 16em;
+  }
+</style>
