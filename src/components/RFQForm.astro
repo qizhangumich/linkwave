@@ -1,0 +1,534 @@
+---
+import Button from './Button.astro';
+
+const endpoint = import.meta.env.PUBLIC_RFQ_ENDPOINT ?? '';
+
+const projectTypes = ['AI Data Center', 'Hyperscale', 'HPC', 'Colocation', 'Cloud / GPU Cloud', 'Other'];
+const stages = ['Concept', 'Design', 'Procurement', 'Construction', 'Expansion'];
+const architectures = [
+  'Direct-to-Chip',
+  'Liquid-to-Liquid',
+  'Liquid-to-Air',
+  'Hybrid',
+  'Not Yet Determined',
+];
+---
+
+<form class="rfq" id="rfq" novalidate data-rfq data-endpoint={endpoint}>
+  <p class="small muted rfq__legend">Fields marked <span aria-hidden="true">*</span><span class="visually-hidden">with an asterisk</span> are required. Everything else is optional.</p>
+
+  <div class="rfq__error-summary" role="alert" tabindex="-1" hidden data-error-summary></div>
+
+  <fieldset class="rfq__set">
+    <legend class="label">Contact</legend>
+    <div class="rfq__grid">
+      <div class="field">
+        <label for="rfq-name">Name *</label>
+        <input id="rfq-name" name="name" type="text" autocomplete="name" required />
+        <p class="field__error" id="rfq-name-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="rfq-company">Company *</label>
+        <input id="rfq-company" name="company" type="text" autocomplete="organization" required />
+        <p class="field__error" id="rfq-company-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="rfq-email">Business email *</label>
+        <input id="rfq-email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" required />
+        <p class="field__error" id="rfq-email-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="rfq-country">Country / region *</label>
+        <input id="rfq-country" name="country" type="text" autocomplete="country-name" required />
+        <p class="field__error" id="rfq-country-error" hidden></p>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="rfq__set">
+    <legend class="label">Project</legend>
+    <div class="rfq__grid">
+      <div class="field">
+        <label for="rfq-type">Project type *</label>
+        <select id="rfq-type" name="projectType" required>
+          <option value="">Select</option>
+          {projectTypes.map((t) => <option>{t}</option>)}
+        </select>
+        <p class="field__error" id="rfq-type-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="rfq-stage">Project stage</label>
+        <select id="rfq-stage" name="projectStage">
+          <option value="">Select</option>
+          {stages.map((s) => <option>{s}</option>)}
+        </select>
+      </div>
+      <div class="field field--wide">
+        <label for="rfq-description">Project description *</label>
+        <textarea id="rfq-description" name="description" rows="5" required aria-describedby="rfq-description-hint"></textarea>
+        <p class="field__hint" id="rfq-description-hint">
+          Thermal load, rack density and facility constraints are the most useful starting points.
+        </p>
+        <p class="field__error" id="rfq-description-error" hidden></p>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- Optional engineering detail: collapsed on phones, open on desktop (spec §39.7). -->
+  <details class="rfq__details" data-rfq-details>
+    <summary>
+      <span class="label">Engineering details</span>
+      <span class="small muted">Optional. Add what you already know.</span>
+    </summary>
+    <div class="rfq__grid">
+      <div class="field">
+        <label for="rfq-capacity">Required cooling capacity</label>
+        <input id="rfq-capacity" name="coolingCapacity" type="text" placeholder="e.g. 2.5 MW" />
+      </div>
+      <div class="field">
+        <label for="rfq-density">Rack density</label>
+        <input id="rfq-density" name="rackDensity" type="text" placeholder="e.g. 120 kW per rack" />
+      </div>
+      <div class="field">
+        <label for="rfq-racks">Number of racks</label>
+        <input id="rfq-racks" name="rackCount" type="text" inputmode="numeric" />
+      </div>
+      <div class="field">
+        <label for="rfq-architecture">Cooling architecture</label>
+        <select id="rfq-architecture" name="coolingArchitecture">
+          <option value="">Select</option>
+          {architectures.map((a) => <option>{a}</option>)}
+        </select>
+      </div>
+      <div class="field">
+        <label for="rfq-facility">Facility water / heat rejection</label>
+        <input id="rfq-facility" name="heatRejection" type="text" placeholder="e.g. dry cooler, 35 °C supply" />
+      </div>
+      <div class="field">
+        <label for="rfq-date">Expected deployment date</label>
+        <input id="rfq-date" name="deploymentDate" type="month" />
+      </div>
+    </div>
+  </details>
+
+  <div class="field field--file">
+    <label for="rfq-file">Upload RFP, specification or drawing</label>
+    <input
+      id="rfq-file"
+      name="attachment"
+      type="file"
+      accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.dxf,.zip,.png,.jpg,.jpeg"
+      aria-describedby="rfq-file-hint rfq-file-status"
+    />
+    <p class="field__hint" id="rfq-file-hint">
+      PDF, Office, DWG/DXF, ZIP or image. 25 MB maximum. Files are used only to prepare a response to this enquiry.
+    </p>
+    <p class="field__status" id="rfq-file-status" aria-live="polite"></p>
+    <p class="field__error" id="rfq-file-error" hidden></p>
+  </div>
+
+  <!-- Spam protection without a puzzle: a hidden field people never see, plus a minimum time on page. -->
+  <div class="rfq__trap" aria-hidden="true">
+    <label for="rfq-website">Leave this field empty</label>
+    <input id="rfq-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="field field--check">
+    <input id="rfq-consent" name="consent" type="checkbox" required />
+    <label for="rfq-consent">
+      I agree that LINKWAVE may use the information above to respond to this enquiry. *
+    </label>
+    <p class="field__error" id="rfq-consent-error" hidden></p>
+  </div>
+
+  <div class="rfq__submit">
+    <Button type="submit" data-submit>Talk to a LINKWAVE Engineer</Button>
+    <p class="small muted" data-submit-status aria-live="polite"></p>
+  </div>
+</form>
+
+<div class="rfq-success" data-rfq-success tabindex="-1" hidden>
+  <p class="label" data-success-eyebrow>Enquiry received</p>
+  <h2 class="h2" data-success-title>Thank you. Your enquiry is with our engineering team.</h2>
+  <p class="lead" data-success-copy>
+    An engineer will review the details and reply to the email address you provided.
+  </p>
+</div>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-rfq]');
+  if (form) {
+    const DRAFT_KEY = 'linkwave-rfq-draft';
+    const MAX_BYTES = 25 * 1024 * 1024;
+    const loadedAt = Date.now();
+    const summary = form.querySelector<HTMLElement>('[data-error-summary]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const status = form.querySelector<HTMLElement>('[data-submit-status]')!;
+    const success = document.querySelector<HTMLElement>('[data-rfq-success]')!;
+    const file = form.querySelector<HTMLInputElement>('#rfq-file')!;
+    const fileStatus = form.querySelector<HTMLElement>('#rfq-file-status')!;
+    const details = form.querySelector<HTMLDetailsElement>('[data-rfq-details]')!;
+
+    type Field = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+    const fields = [...form.querySelectorAll<Field>('input, select, textarea')].filter(
+      (f) => f.name !== 'website',
+    );
+
+    if (window.matchMedia('(min-width: 62rem)').matches) details.open = true;
+
+    // ----- draft: text fields only, this tab only -----
+    const storage = {
+      read(): Record<string, string> {
+        try {
+          return JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? '{}');
+        } catch {
+          return {};
+        }
+      },
+      write(value: Record<string, string>) {
+        try {
+          sessionStorage.setItem(DRAFT_KEY, JSON.stringify(value));
+        } catch {
+          /* storage unavailable: the form still works */
+        }
+      },
+      clear() {
+        try {
+          sessionStorage.removeItem(DRAFT_KEY);
+        } catch {
+          /* ignore */
+        }
+      },
+    };
+    const draft = storage.read();
+    fields.forEach((f) => {
+      if (f.type === 'file' || f.type === 'checkbox') return;
+      if (draft[f.name]) {
+        f.value = draft[f.name];
+        if (details.contains(f)) details.open = true;
+      }
+    });
+    form.addEventListener('input', () => {
+      const next: Record<string, string> = {};
+      fields.forEach((f) => {
+        if (f.type !== 'file' && f.type !== 'checkbox' && f.value) next[f.name] = f.value;
+      });
+      storage.write(next);
+    });
+
+    // ----- validation -----
+    const labelOf = (f: Field) =>
+      form.querySelector<HTMLLabelElement>(`label[for="${f.id}"]`)?.textContent?.replace('*', '').trim() ?? f.name;
+
+    const messageFor = (f: Field): string => {
+      if (f.type === 'file') {
+        const picked = (f as HTMLInputElement).files?.[0];
+        return picked && picked.size > MAX_BYTES
+          ? `This file is ${(picked.size / 1048576).toFixed(1)} MB. Choose a file under 25 MB, or send a link in the description.`
+          : '';
+      }
+      if (f.type === 'checkbox') {
+        return f.required && !(f as HTMLInputElement).checked
+          ? 'Tick the box to confirm we may use these details to reply.'
+          : '';
+      }
+      if (f.required && !f.value.trim()) {
+        return f.tagName === 'SELECT' ? 'Select a project type.' : `Enter your ${labelOf(f).toLowerCase()}.`;
+      }
+      if (f.type === 'email' && f.value && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.value.trim())) {
+        return 'Enter an email address in the format name@company.com.';
+      }
+      return '';
+    };
+
+    const show = (f: Field, message: string) => {
+      const error = form.querySelector<HTMLElement>(`#${f.id}-error`);
+      if (!error) return;
+      error.textContent = message;
+      error.hidden = !message;
+      f.toggleAttribute('aria-invalid', !!message);
+      const described = (f.getAttribute('aria-describedby') ?? '').split(' ').filter((id) => id && id !== error.id);
+      if (message) described.push(error.id);
+      if (described.length) f.setAttribute('aria-describedby', described.join(' '));
+      else f.removeAttribute('aria-describedby');
+    };
+
+    fields.forEach((f) => {
+      f.addEventListener('blur', () => show(f, messageFor(f)));
+      f.addEventListener('input', () => {
+        if (f.hasAttribute('aria-invalid')) show(f, messageFor(f));
+      });
+    });
+
+    file.addEventListener('change', () => {
+      const picked = file.files?.[0];
+      fileStatus.textContent = picked
+        ? `Attached: ${picked.name} (${(picked.size / 1048576).toFixed(1)} MB). It uploads when you submit.`
+        : '';
+      show(file, messageFor(file));
+    });
+
+    const setBusy = (busy: boolean) => {
+      submit.disabled = busy;
+      submit.toggleAttribute('data-loading', busy);
+      status.textContent = busy ? (file.files?.length ? 'Uploading and sending…' : 'Sending…') : '';
+    };
+
+    const finish = (sent: boolean) => {
+      if (!sent) {
+        success.querySelector('[data-success-eyebrow]')!.textContent = 'Preview build';
+        success.querySelector('[data-success-title]')!.textContent =
+          'The form is valid, but nothing was sent.';
+        success.querySelector('[data-success-copy]')!.textContent =
+          'This build has no form endpoint configured (PUBLIC_RFQ_ENDPOINT), so your details stayed in this browser.';
+      } else {
+        storage.clear();
+      }
+      form.hidden = true;
+      success.hidden = false;
+      success.focus();
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const invalid = fields.map((f) => [f, messageFor(f)] as const).filter(([, m]) => m);
+      fields.forEach((f) => show(f, messageFor(f)));
+
+      if (invalid.length) {
+        summary.replaceChildren(
+          Object.assign(document.createElement('p'), {
+            textContent:
+              invalid.length === 1 ? 'One field needs attention:' : `${invalid.length} fields need attention:`,
+          }),
+          Object.assign(document.createElement('ul'), {
+            innerHTML: invalid
+              .map(([f]) => `<li><a href="#${f.id}">${labelOf(f).replace(/</g, '&lt;')}</a></li>`)
+              .join(''),
+          }),
+        );
+        summary.hidden = false;
+        summary.focus();
+        return;
+      }
+      summary.hidden = true;
+
+      // Bots fill the hidden field or submit within a second or two; real enquiries do neither.
+      const trap = form.querySelector<HTMLInputElement>('#rfq-website')!;
+      if (trap.value || Date.now() - loadedAt < 2500) {
+        finish(false);
+        return;
+      }
+
+      const endpoint = form.dataset.endpoint;
+      if (!endpoint) {
+        finish(false);
+        return;
+      }
+
+      setBusy(true);
+      try {
+        const response = await fetch(endpoint, { method: 'POST', body: new FormData(form) });
+        if (!response.ok) throw new Error(String(response.status));
+        finish(true);
+      } catch {
+        setBusy(false);
+        summary.replaceChildren(
+          Object.assign(document.createElement('p'), {
+            textContent:
+              'Your enquiry could not be sent. Check your connection and submit again. Your entries are still here.',
+          }),
+        );
+        summary.hidden = false;
+        summary.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .rfq {
+    display: grid;
+    gap: var(--space-12);
+  }
+  .rfq__set {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .rfq__set legend,
+  .rfq__details summary {
+    width: 100%;
+    padding: var(--space-4) 0 var(--space-6);
+    border-top: 1px solid var(--border-strong);
+  }
+  .rfq__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6) var(--col-gap);
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  .field--wide {
+    grid-column: 1 / -1;
+  }
+  .field label {
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+  .field input:not([type='checkbox']):not([type='file']),
+  .field select,
+  .field textarea {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.7rem 0.875rem;
+    border: 1px solid var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    background: var(--surface-primary);
+    font-size: 1rem;
+    transition: border-color var(--motion-fast) var(--ease);
+  }
+  .field textarea {
+    resize: vertical;
+    line-height: 1.5;
+  }
+  .field input:hover,
+  .field select:hover,
+  .field textarea:hover {
+    border-color: var(--text-primary);
+  }
+  .field :is(input, select, textarea):focus-visible {
+    outline-offset: 0;
+    border-color: var(--accent);
+  }
+  .field [aria-invalid] {
+    border-color: var(--error) !important;
+  }
+  .field ::placeholder {
+    color: var(--text-tertiary);
+    opacity: 1;
+  }
+  .field__hint,
+  .field__status {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+  }
+  .field__status:empty {
+    display: none;
+  }
+  .field__status {
+    color: var(--text-primary);
+  }
+  .field__error {
+    font-size: 0.875rem;
+    color: var(--error);
+  }
+  .field__error::before {
+    content: 'Error: ';
+    font-weight: 600;
+  }
+
+  .field--file input {
+    padding: var(--space-4);
+    border: 1px dashed var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+  .field--file input::file-selector-button {
+    margin-right: var(--space-4);
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: none;
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  .field--check {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-3);
+    align-items: start;
+  }
+  .field--check input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0.15rem 0 0;
+    accent-color: var(--accent);
+  }
+  .field--check label {
+    font-weight: 400;
+  }
+  .field--check .field__error {
+    grid-column: 2;
+  }
+
+  .rfq__details summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+    cursor: pointer;
+    list-style: none;
+  }
+  .rfq__details summary::-webkit-details-marker {
+    display: none;
+  }
+  .rfq__details summary::after {
+    content: '+';
+    margin-left: auto;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+  .rfq__details[open] summary::after {
+    content: '−';
+  }
+
+  .rfq__trap {
+    position: absolute;
+    left: -200vw;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .rfq__error-summary {
+    padding: var(--space-4) var(--space-6);
+    border: 1px solid var(--error);
+    border-left-width: 4px;
+    color: var(--error);
+  }
+  .rfq__error-summary :global(ul) {
+    margin-top: var(--space-2);
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+  .rfq__submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .rfq-success {
+    display: grid;
+    gap: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border-strong);
+  }
+  .rfq-success:focus {
+    outline: none;
+  }
+
+  @media (max-width: 47.99rem) {
+    .rfq__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .rfq {
+      gap: var(--space-8);
+    }
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'text';
+  arrow?: boolean;
+  type?: 'button' | 'submit';
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { href, variant = 'primary', arrow = variant !== 'secondary', type = 'button', class: cls, ...rest } = Astro.props;
+const Tag = href ? 'a' : 'button';
+const classes = ['btn', `btn--${variant}`, cls];
+---
+
+<Tag class:list={classes} href={href} type={href ? undefined : type} {...rest}>
+  <span class="btn__label"><slot /></span>
+  {arrow && <span class="btn__arrow" aria-hidden="true">→</span>}
+</Tag>
+
+<style is:global>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--motion-fast) var(--ease),
+      border-color var(--motion-fast) var(--ease),
+      color var(--motion-fast) var(--ease);
+  }
+  .btn__arrow {
+    transition: transform var(--motion-fast) var(--ease);
+  }
+  .btn:hover .btn__arrow {
+    transform: translateX(3px);
+  }
+
+  .btn--primary {
+    background: var(--text-primary);
+    color: var(--surface-primary);
+  }
+  .btn--primary:hover {
+    background: var(--accent);
+  }
+  .btn--primary:active {
+    background: var(--accent-hover);
+  }
+  .inverse .btn--primary {
+    background: var(--text-inverse);
+    color: var(--surface-inverse);
+  }
+  .inverse .btn--primary:hover {
+    background: var(--accent);
+    color: var(--surface-inverse);
+  }
+
+  .btn--secondary {
+    border-color: var(--border-strong);
+    background: transparent;
+    color: inherit;
+  }
+  .btn--secondary:hover {
+    background: var(--text-primary);
+    color: var(--surface-primary);
+  }
+  .inverse .btn--secondary:hover {
+    background: var(--text-inverse);
+    color: var(--surface-inverse);
+  }
+
+  .btn--text {
+    min-height: 0;
+    padding: 0 0 0.3em;
+    border: 0;
+    border-bottom: 1px solid currentColor;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+  }
+  .btn--text:hover {
+    color: var(--accent);
+  }
+
+  .btn[disabled],
+  .btn[aria-disabled='true'] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn[data-loading] .btn__arrow {
+    animation: btn-pulse 900ms ease-in-out infinite alternate;
+  }
+  @keyframes btn-pulse {
+    to {
+      opacity: 0.2;
+    }
+  }
+</style>

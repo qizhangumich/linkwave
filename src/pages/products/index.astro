@@ -1,0 +1,126 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Figure from '@/components/Figure.astro';
+import PageHero from '@/components/PageHero.astro';
+import { products } from '@/content/products';
+import { cta } from '@/content/site';
+
+const list = products.filter((p) => p.publicationStatus === 'published');
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Products' }];
+---
+
+<Base
+  title="Products"
+  description="LINKWAVE liquid-cooling equipment: centralized CDUs to 2.5 MW, primary-side pump stations, manifolds and distribution, and liquid-cooled racks."
+>
+  <PageHero
+    crumbs={crumbs}
+    eyebrow="Products"
+    title="Equipment for every stage of the loop."
+    lead="Four equipment families cover the path from the rack manifold to the facility-water loop. Each is sized and configured per project."
+  >
+    <Fragment slot="actions">
+      <Button href={cta.primary.href}>{cta.primary.label}</Button>
+    </Fragment>
+    <ul class="plist">
+      {
+        list.map((p) => (
+          <li class="grid plist__row">
+            <a class="plist__media" href={`/products/${p.slug}/`} tabindex="-1" aria-hidden="true">
+              <Figure
+                src={p.hero.src}
+                alt=""
+                ratio="4 / 3"
+                mobileRatio="1 / 1"
+                position={p.mobileFocus}
+                sizes="(min-width: 62rem) 40vw, 100vw"
+              />
+            </a>
+            <div class="plist__body">
+              <p class="label">{p.category}</p>
+              <h2 class="h2">{p.name}</h2>
+              <p class="muted">{p.shortDescription}</p>
+              <dl class="plist__metrics">
+                {p.keyMetrics.slice(0, 3).map((m) => (
+                  <div>
+                    <dt class="label">{m.label}</dt>
+                    <dd class="data">
+                      {m.value}
+                      {m.unit && <span class="unit">{m.unit}</span>}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <Button variant="text" href={`/products/${p.slug}/`} aria-label={`Explore ${p.name}`}>
+                Explore
+              </Button>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </PageHero>
+
+  <CtaBand
+    title="Not sure which system fits?"
+    copy="Describe the load and the facility. An engineer will suggest the architecture and the equipment that belongs in it."
+  />
+</Base>
+
+<style>
+  .plist {
+    border-top: 1px solid var(--border-strong);
+  }
+  .plist__row {
+    row-gap: var(--space-6);
+    align-items: start;
+    padding-block: clamp(2rem, 4vw, 4rem);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .plist__media {
+    grid-column: 1 / span 5;
+    display: block;
+  }
+  .plist__body {
+    grid-column: 7 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .plist__body > p.muted {
+    max-width: 34em;
+  }
+  .plist__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4) var(--col-gap);
+    width: 100%;
+    margin: var(--space-4) 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .plist__metrics > div {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+  .plist__metrics dd {
+    font-size: clamp(1.25rem, 1.8vw, 1.75rem);
+    letter-spacing: -0.03em;
+  }
+  @media (max-width: 61.99rem) {
+    .plist__media,
+    .plist__body {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .plist__metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

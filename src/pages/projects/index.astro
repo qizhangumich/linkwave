@@ -1,0 +1,120 @@
+---
+import Base from '@/layouts/Base.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Figure from '@/components/Figure.astro';
+import PageHero from '@/components/PageHero.astro';
+import { projects } from '@/content/projects';
+import { cta, site } from '@/content/site';
+import { isPublic } from '@/lib/publish';
+
+const list = projects.filter((p) => site.previewUnapprovedProjects || p.publicationApproved);
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Projects' }];
+---
+
+<Base
+  title="Projects"
+  description="LINKWAVE liquid-cooling project references: a 2.5 MW integration and a pump station in the United States, a pump station in Singapore and a 500 kW data center in China."
+>
+  <PageHero
+    crumbs={crumbs}
+    eyebrow="Projects"
+    title="Delivered systems."
+    lead="Project references, described by scope and architecture. Customers are not named without their approval."
+  >
+    <div class="cases">
+      {
+        list.map((p) => {
+          const capacity = p.capacity && isPublic(p.capacity.status) ? p.capacity : undefined;
+          return (
+            <article class="case">
+              <a class="case__media" href={`/projects/${p.slug}/`} tabindex="-1" aria-hidden="true">
+                <Figure
+                  src={p.heroImage.src}
+                  alt=""
+                  ratio="16 / 10"
+                  mobileRatio="4 / 3"
+                  sizes="(min-width: 62rem) 45vw, 100vw"
+                />
+              </a>
+              <p class="label">
+                {p.country} / {p.application}
+              </p>
+              <h2 class="h3">
+                <a href={`/projects/${p.slug}/`}>{p.title}</a>
+              </h2>
+              <dl class="case__data">
+                {capacity && (
+                  <div>
+                    <dt class="label">{capacity.label}</dt>
+                    <dd>
+                      {capacity.value} {capacity.unit}
+                    </dd>
+                  </div>
+                )}
+                {p.rackCount && (
+                  <div>
+                    <dt class="label">Racks</dt>
+                    <dd>{p.rackCount}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt class="label">Architecture</dt>
+                  <dd>{p.architecture}</dd>
+                </div>
+              </dl>
+            </article>
+          );
+        })
+      }
+    </div>
+  </PageHero>
+
+  <CtaBand
+    title="Planning something similar?"
+    copy="Share the load, rack count and site constraints. An engineer will respond with an architecture and the questions that need answering."
+    primary={cta.similar}
+  />
+</Base>
+
+<style>
+  .cases {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(3rem, 6vw, 6rem) var(--col-gap);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border-strong);
+  }
+  .case {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .case__media {
+    display: block;
+    margin-bottom: var(--space-3);
+  }
+  .case h2 a {
+    text-decoration: none;
+  }
+  .case h2 a:hover {
+    color: var(--accent);
+  }
+  .case__data {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--space-8);
+    margin: var(--space-3) 0 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .case__data dd {
+    margin-top: 0.25rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 47.99rem) {
+    .cases {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

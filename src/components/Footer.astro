@@ -1,0 +1,134 @@
+---
+import { footer, site } from '@/content/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer inverse">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <p class="footer__wordmark">{site.name}</p>
+        <p class="muted">{site.positioning}</p>
+      </div>
+      {
+        footer.columns.map((column) => (
+          <nav aria-label={column.title}>
+            <h2 class="label">{column.title}</h2>
+            <ul>
+              {column.links.map((link) => (
+                <li>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))
+      }
+    </div>
+    <div class="footer__base small">
+      <p class="muted">© {year} {site.name}</p>
+      <button class="footer__cookie" type="button" data-cookie-open>Cookie settings</button>
+    </div>
+  </div>
+</footer>
+
+<!-- CookieControls: the site loads no analytics or advertising scripts, so there is nothing to consent to yet.
+     If tracking is added later, gate it behind a choice recorded here before it loads. -->
+<dialog class="cookie" data-cookie-dialog aria-labelledby="cookie-title">
+  <h2 id="cookie-title" class="h3">Cookie settings</h2>
+  <p>
+    This site sets no tracking or advertising cookies and loads no third-party analytics.
+  </p>
+  <p>
+    If you start the enquiry form, your draft is kept in this browser tab’s session storage so it
+    survives a reload. It is cleared when you close the tab or submit the form.
+  </p>
+  <form method="dialog">
+    <button class="btn btn--primary" type="submit"><span class="btn__label">Close</span></button>
+  </form>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-cookie-dialog]');
+  document.querySelector('[data-cookie-open]')?.addEventListener('click', () => dialog?.showModal());
+</script>
+
+<style>
+  .footer {
+    padding-block: var(--space-24) var(--space-8);
+  }
+  .footer__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 1fr));
+    gap: var(--space-12) var(--col-gap);
+    padding-bottom: var(--space-24);
+  }
+  .footer__wordmark {
+    margin-bottom: var(--space-4);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+  }
+  .footer__brand .muted {
+    max-width: 16em;
+  }
+  .footer nav ul {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+  .footer nav a {
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+  .footer nav a:hover {
+    color: var(--accent);
+  }
+  .footer__base {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .footer__cookie {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .footer__cookie:hover {
+    color: var(--text-inverse);
+  }
+
+  .cookie {
+    width: min(30rem, calc(100vw - 2.5rem));
+    padding: var(--space-8);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface-primary);
+    color: var(--text-primary);
+  }
+  .cookie::backdrop {
+    background: rgba(17, 18, 18, 0.5);
+  }
+  .cookie p {
+    margin-top: var(--space-4);
+    color: var(--text-secondary);
+  }
+  .cookie form {
+    margin-top: var(--space-8);
+  }
+
+  @media (max-width: 61.99rem) {
+    .footer__top {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .footer__brand {
+      grid-column: 1 / -1;
+    }
+    .footer {
+      padding-bottom: calc(var(--space-8) + 4.5rem);
+    }
+  }
+</style>

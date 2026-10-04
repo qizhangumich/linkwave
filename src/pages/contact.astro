@@ -1,0 +1,107 @@
+---
+import Base from '@/layouts/Base.astro';
+import RFQForm from '@/components/RFQForm.astro';
+
+const useful = [
+  'IT load and rack density',
+  'Number of racks and layout constraints',
+  'Facility water temperatures and heat-rejection method',
+  'Redundancy requirement',
+  'Target deployment date',
+];
+const next = [
+  'An engineer reviews the enquiry and any attached documents.',
+  'You receive a reply with clarifying questions or a proposed architecture.',
+  'Where the project fits, we prepare calculations, a layout and a process flow diagram.',
+];
+---
+
+<Base
+  title="Talk to an Engineer"
+  description="Send LINKWAVE your thermal load, rack density, facility constraints or RFP. Our engineering team will respond with a cooling architecture."
+  stickyCta={false}
+>
+  <section class="contact">
+    <div class="container grid">
+      <div class="contact__intro">
+        <p class="label">Contact</p>
+        <h1 class="h1">Talk to an Engineer</h1>
+        <p class="lead">
+          Bring us your thermal load, rack density, facility constraints or RFP. The more specific the
+          input, the more specific the reply.
+        </p>
+
+        <div class="contact__list">
+          <h2 class="label">Useful to include</h2>
+          <ul>
+            {useful.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+        <div class="contact__list desk-only">
+          <h2 class="label">What happens next</h2>
+          <ol>
+            {next.map((item) => <li>{item}</li>)}
+          </ol>
+        </div>
+      </div>
+      <div class="contact__form">
+        <RFQForm />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact {
+    padding-block: clamp(2.5rem, 6vw, 6rem) var(--section-pad);
+  }
+  .contact .grid {
+    row-gap: var(--space-16);
+    align-items: start;
+  }
+  .contact__intro {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: var(--space-8);
+  }
+  .contact__form {
+    grid-column: 7 / -1;
+  }
+  .contact__list ul,
+  .contact__list ol {
+    margin-top: var(--space-3);
+    border-top: 1px solid var(--border-strong);
+  }
+  .contact__list li {
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+  }
+  .contact__list ol {
+    counter-reset: step;
+  }
+  .contact__list ol li {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    counter-increment: step;
+  }
+  .contact__list ol li::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: var(--type-label);
+    line-height: 2.2;
+    color: var(--text-tertiary);
+  }
+  @media (min-width: 62rem) {
+    .contact__intro {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-8));
+    }
+  }
+  @media (max-width: 61.99rem) {
+    .contact__intro,
+    .contact__form {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

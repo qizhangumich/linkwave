@@ -1,0 +1,60 @@
+---
+import { cta } from '@/content/site';
+---
+
+<!-- Restrained sticky action for phones (spec §39.7). Appears once the hero has scrolled away. -->
+<div class="mobile-cta" data-mobile-cta>
+  <a href={cta.primary.href}>
+    <span>{cta.primary.label}</span>
+    <span aria-hidden="true">→</span>
+  </a>
+</div>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-mobile-cta]');
+  const update = () => {
+    const nearEnd = window.innerHeight + window.scrollY > document.body.scrollHeight - 320;
+    bar?.toggleAttribute('data-visible', window.scrollY > window.innerHeight * 0.8 && !nearEnd);
+  };
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+</script>
+
+<style>
+  .mobile-cta {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 40;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--surface-inverse);
+    color: var(--text-inverse);
+    transform: translateY(100%);
+    visibility: hidden;
+    transition:
+      transform var(--motion-standard) var(--ease),
+      visibility 0s linear var(--motion-standard);
+  }
+  .mobile-cta[data-visible] {
+    transform: none;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+  .mobile-cta a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3.5rem;
+    padding-inline: var(--gutter);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  @media (min-width: 48rem) {
+    .mobile-cta {
+      display: none;
+    }
+  }
+  :global(html.nav-open) .mobile-cta {
+    display: none;
+  }
+</style>

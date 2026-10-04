@@ -1,0 +1,1042 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Figure from '@/components/Figure.astro';
+import SectionHeader from '@/components/SectionHeader.astro';
+import MetricRail from '@/components/MetricRail.astro';
+import SystemDiagram from '@/components/SystemDiagram.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import { cta, site } from '@/content/site';
+import { claim } from '@/content/claims';
+import { products } from '@/content/products';
+import { deliveryRegions, deployments, project, projects } from '@/content/projects';
+import {
+  engineering,
+  globalDeployment,
+  hero,
+  modular,
+  proof,
+  proofFootnote,
+  reliability,
+  scale,
+} from '@/content/home';
+import { solutions } from '@/content/solutions';
+import { showUnapproved } from '@/lib/publish';
+
+import pumpRender from '@/assets/images/pump-station-render.jpg';
+import pumpPid from '@/assets/images/pump-station-pid.jpg';
+import usPump from '@/assets/images/us-pump-station.jpg';
+
+const flagship = project('us-2-5mw-liquid-cooling');
+const showProjects = (slug: string) =>
+  site.previewUnapprovedProjects || project(slug).publicationApproved;
+
+const proofMetrics = proof.map((p) => ({
+  value: p.value,
+  unit: p.unit || undefined,
+  label: p.lines.join(' '),
+  note: claim(p.claimId).scope,
+}));
+const footnoteIndex = proof.findIndex((p) => p.footnote);
+
+const flagshipRail = [
+  { value: '2.5', unit: 'MW', label: 'Cooling scale' },
+  { value: '20', label: 'Racks' },
+  { value: '1', label: 'Centralized CDU' },
+  { value: 'Integrated', label: 'Piping network' },
+  { value: 'Integrated', label: 'Dry cooler' },
+];
+
+const regions = deliveryRegions.map((region) => ({
+  region,
+  references: deployments.filter((d) => d.region === region && d.projectSlug && showProjects(d.projectSlug)),
+}));
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<Base ogImage={flagship.heroImage.src.src}>
+  <div class="home">
+    <!-- 01 Hero -->
+    <section class="hero" data-chapter="hero">
+      <div class="container">
+        <div class="grid hero__head">
+          <p class="label hero__eyebrow">{hero.eyebrow}</p>
+          <h1 class="display hero__title">
+            {hero.title.map((line) => <span>{line} </span>)}
+          </h1>
+          <div class="hero__body">
+            <p class="lead">{hero.copy}</p>
+            <div class="hero__actions">
+              <Button href={cta.primary.href}>{cta.primary.label}</Button>
+              <Button href={hero.secondaryCta.href} variant="secondary">{hero.secondaryCta.label}</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container hero__media">
+        <Figure
+          src={flagship.heroImage.src}
+          alt={flagship.heroImage.alt}
+          caption={flagship.heroImage.caption}
+          ratio="21 / 10"
+          mobileRatio="4 / 5"
+          position="78% 60%"
+          sizes="(min-width: 90rem) 1360px, 100vw"
+          eager
+        />
+      </div>
+    </section>
+
+    <!-- 02 Proof -->
+    <section class="proof" data-chapter="proof" aria-label="Key figures">
+      <div class="container">
+        <MetricRail metrics={proofMetrics} size="xl" footnote={proofFootnote} footnoteFor={footnoteIndex} />
+      </div>
+    </section>
+
+    <!-- 03 System architecture -->
+    <section class="section section--tint" id="architecture" data-chapter="architecture">
+      <div class="container">
+        <SectionHeader eyebrow="System architecture" title="Cooling infrastructure from chip loop to facility loop." />
+        <SystemDiagram />
+      </div>
+    </section>
+
+    <!-- 04 Solutions -->
+    <section class="section" id="solutions" data-chapter="solutions">
+      <div class="container">
+        <SectionHeader eyebrow="Solutions" title="Engineered around the workload." />
+        <div class="solutions grid" data-tabs>
+          <div class="solutions__list" role="tablist" aria-label="Workloads" aria-orientation="vertical">
+            {
+              solutions.map((s, i) => (
+                <button
+                  class="solutions__tab"
+                  type="button"
+                  role="tab"
+                  id={`tab-${s.id}`}
+                  aria-controls={`panel-${s.id}`}
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                  tabindex={i === 0 ? 0 : -1}
+                >
+                  {s.name}
+                </button>
+              ))
+            }
+          </div>
+          <div class="solutions__panels">
+            {
+              solutions.map((s, i) => (
+                <article
+                  class="solution"
+                  role="tabpanel"
+                  id={`panel-${s.id}`}
+                  aria-labelledby={`tab-${s.id}`}
+                  data-active={i === 0 ? '' : undefined}
+                >
+                  <Figure
+                    src={s.image}
+                    alt={s.alt}
+                    caption={s.caption}
+                    ratio="16 / 9"
+                    mobileRatio="4 / 3"
+                    sizes="(min-width: 62rem) 55vw, 100vw"
+                  />
+                  <h3 class="h3 solution__name">{s.name}</h3>
+                  <dl class="solution__text">
+                    <div class="desk-only">
+                      <dt class="label">Challenge</dt>
+                      <dd>{s.challenge}</dd>
+                    </div>
+                    <div>
+                      <dt class="label">Response</dt>
+                      <dd>{s.response}</dd>
+                    </div>
+                  </dl>
+                  <Button variant="text" href={`/solutions/${s.id}/`} aria-label={`${s.name} solution`}>
+                    View solution
+                  </Button>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 Scale continuum -->
+    <section class="section section--tint" id="scale" data-chapter="scale">
+      <div class="container">
+        <SectionHeader eyebrow="Scale" title="From rack-level cooling to multi-megawatt infrastructure." />
+        <ol class="scale">
+          {
+            scale.map((step) => (
+              <li class="scale__step">
+                <div class="scale__figure" aria-hidden="true">
+                  <span class="scale__shape" style={`--w: ${step.w}; --h: ${step.h}`} />
+                </div>
+                <p class="label">{step.level}</p>
+                <p class="scale__system">{step.system}</p>
+                {step.capacity && <p class="scale__capacity data">{step.capacity}</p>}
+              </li>
+            ))
+          }
+        </ol>
+        <p class="small muted scale__note">Outlines are schematic and not to scale.</p>
+      </div>
+    </section>
+
+    <!-- 06 Products -->
+    <section class="section" id="products" data-chapter="products">
+      <div class="container">
+        <SectionHeader eyebrow="Products" title="Major equipment families." />
+        <div class="products">
+          {
+            products.map((p) => (
+              <article class="product">
+                <a class="product__media" href={`/products/${p.slug}/`} tabindex="-1" aria-hidden="true">
+                  <Figure
+                    src={p.hero.src}
+                    alt=""
+                    ratio="1 / 1"
+                    mobileRatio="1 / 1"
+                    position={p.mobileFocus}
+                    sizes="(min-width: 62rem) 45vw, 100vw"
+                  />
+                </a>
+                <div class="product__body">
+                  <p class="label">{p.category}</p>
+                  <h3 class="h3">{p.name}</h3>
+                  {p.capacityRange && <p class="product__capacity data data--l">{p.capacityRange}</p>}
+                  <p class="muted desk-only">{p.systemRole}</p>
+                  <p class="product__diff">{p.differentiator}</p>
+                  <Button variant="text" href={`/products/${p.slug}/`} aria-label={`Explore ${p.name}`}>
+                    Explore
+                  </Button>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+        <div class="controls-row grid">
+          <p class="label controls-row__label">Controls</p>
+          <h3 class="h3 controls-row__title">Controls designed with the hydraulics.</h3>
+          <p class="muted controls-row__text">
+            Control cabinets and the operator interface are designed and built in-house for each system.
+            Pumps and heat-rejection fans run on variable-frequency control, with Ethernet / Modbus
+            communication available as an option.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 Modular cooling -->
+    <section class="section inverse" id="modular" data-chapter="modular">
+      <div class="container">
+        <SectionHeader eyebrow={modular.eyebrow} title={modular.title} lead={modular.copy} />
+        <Figure
+          src={pumpRender}
+          alt={modular.alt}
+          caption={modular.caption}
+          ratio="21 / 9"
+          mobileRatio="4 / 3"
+          position="50% 55%"
+          sizes="(min-width: 90rem) 1360px, 100vw"
+        />
+        <ol class="workflow workflow--6">
+          {
+            modular.steps.map((step, i) => (
+              <li>
+                <span class="label">{pad(i + 1)}</span>
+                <span class="workflow__name">{step}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <div class="modular__action">
+          <Button href="/modular-cooling/">Explore modular cooling</Button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 Flagship project -->
+    {
+      showProjects(flagship.slug) && (
+        <section class="section" id="projects" data-chapter="flagship">
+          <div class="container">
+            <SectionHeader
+              eyebrow={`${flagship.country} / ${flagship.application}`}
+              title="2.5 MW Liquid-Cooled Computing Integration"
+            />
+            <Figure
+              src={flagship.gallery[0].src}
+              alt={flagship.gallery[0].alt}
+              caption={flagship.gallery[0].caption}
+              ratio="2 / 1"
+              mobileRatio="4 / 5"
+              position="30% 50%"
+              sizes="(min-width: 90rem) 1360px, 100vw"
+            />
+            <dl class="flagship__rail">
+              {flagshipRail.map((m) => (
+                <div>
+                  <dt class="label">{m.label}</dt>
+                  <dd class="data data--l">
+                    {m.value}
+                    {m.unit && <span class="unit">{m.unit}</span>}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div class="flagship__foot grid">
+              <p class="lead">{flagship.summary}</p>
+              <div>
+                <Button href={`/projects/${flagship.slug}/`}>View Project</Button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- 09 Reliability -->
+    <section class="section section--tint" id="reliability" data-chapter="reliability">
+      <div class="container">
+        <SectionHeader eyebrow={reliability.eyebrow} title={reliability.title} lead={reliability.copy} />
+        <div class="grid reliability">
+          <div class="reliability__media">
+            <Figure
+              src={usPump}
+              alt="White enclosed pump station with operator panel, with a dry-cooler coil behind it."
+              caption="Photograph. Primary-side pump station with 1+1 circulation pumps, built for a United States project."
+              ratio="4 / 3"
+              mobileRatio="1 / 1"
+              sizes="(min-width: 62rem) 40vw, 100vw"
+            />
+          </div>
+          <dl class="reliability__points">
+            {
+              reliability.points.map((point) => (
+                <div>
+                  <dt>{point.term}</dt>
+                  <dd class="muted">{point.detail}</dd>
+                </div>
+              ))
+            }
+            {
+              showUnapproved &&
+                reliability.fleet.map((metric) => (
+                  <div class="desk-only">
+                    <dt class="tbd">[TBD] {metric.label}</dt>
+                    <dd class="muted small">Hidden in production until verified.</dd>
+                  </div>
+                ))
+            }
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 Engineering -->
+    <section class="section" id="engineering" data-chapter="engineering">
+      <div class="container">
+        <SectionHeader eyebrow={engineering.eyebrow} title={engineering.title} lead={engineering.copy} />
+        <ol class="workflow workflow--7 workflow--detailed">
+          {
+            engineering.steps.map((step, i) => (
+              <li>
+                <span class="label">{pad(i + 1)}</span>
+                <span class="workflow__name">{step.name}</span>
+                <ul class="workflow__items small muted">
+                  {step.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </li>
+            ))
+          }
+        </ol>
+        <div class="grid engineering__artifact desk-only">
+          <Figure
+            class="engineering__figure"
+            src={pumpPid}
+            alt={engineering.artifactAlt}
+            caption={engineering.artifactCaption}
+            fit="contain"
+            sizes="(min-width: 62rem) 65vw, 100vw"
+          />
+          <div class="engineering__aside">
+            <p class="label">Pre-sales engineering package</p>
+            <ul class="engineering__list">
+              <li>Design calculation document</li>
+              <li>Layout plan</li>
+              <li>Process flow diagram</li>
+              <li>3D model</li>
+              <li>Electrical schematic</li>
+              <li>HMI design</li>
+            </ul>
+            <Button variant="text" href="/engineering/">How we engineer</Button>
+          </div>
+        </div>
+        <div class="mobile-only engineering__more">
+          <Button variant="text" href="/engineering/">How we engineer</Button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 Global deployment -->
+    <section class="section section--tint" id="deployment" data-chapter="deployment">
+      <div class="container">
+        <SectionHeader eyebrow={globalDeployment.eyebrow} title={globalDeployment.title} />
+        <ul class="regions">
+          {
+            regions.map(({ region, references }) => (
+              <li class="regions__row grid">
+                <h3 class="regions__name">{region}</h3>
+                <div class="regions__refs">
+                  {references.length > 0 ? (
+                    <ul>
+                      {references.map((ref) => {
+                        const p = projects.find((x) => x.slug === ref.projectSlug)!;
+                        return (
+                          <li>
+                            <a href={`/projects/${p.slug}/`}>
+                              <span class="label">
+                                {ref.cityOrRegion ?? ref.country}
+                                {ref.capacity && ` · ${ref.capacity}`}
+                              </span>
+                              <span class="regions__title">{p.title}</span>
+                              <span aria-hidden="true">→</span>
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <p class="muted small">Equipment delivered. No public project reference.</p>
+                  )}
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="small muted regions__note">{globalDeployment.note}</p>
+      </div>
+    </section>
+
+    <!-- 12 Final CTA -->
+    <div data-chapter="cta" class="home__cta">
+      <CtaBand tint={false} />
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Solutions tabs: on desktop one workload is shown at a time; on phones every panel is a stacked chapter.
+  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const select = (tab: HTMLButtonElement, focus = false) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')!)?.toggleAttribute('data-active', on);
+      });
+      if (focus) tab.focus();
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (event) => {
+        const step = event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        select(tabs[(i + step + tabs.length) % tabs.length], true);
+      });
+    });
+  });
+</script>
+
+<style>
+  /* ---------- hero ---------- */
+  .hero {
+    padding-top: clamp(2.5rem, 6vw, 6rem);
+  }
+  .hero__head {
+    row-gap: var(--space-8);
+    align-items: end;
+  }
+  .hero__eyebrow {
+    grid-column: 1 / -1;
+  }
+  .hero__title {
+    grid-column: 1 / span 8;
+  }
+  .hero__title span {
+    display: block;
+  }
+  .hero__body {
+    grid-column: 9 / -1;
+    padding-bottom: 0.6rem;
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+  .hero__media {
+    margin-top: clamp(2.5rem, 5vw, 5rem);
+  }
+
+  .proof {
+    padding-block: clamp(3rem, 6vw, 6rem) var(--section-pad);
+  }
+
+  /* ---------- solutions ---------- */
+  .solutions__list {
+    grid-column: 1 / span 4;
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .solutions__tab {
+    position: relative;
+    padding: 1.1rem 0 1.1rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    background: none;
+    text-align: left;
+    font-size: var(--type-h3);
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition:
+      color var(--motion-fast) var(--ease),
+      padding var(--motion-standard) var(--ease);
+  }
+  .solutions__tab:hover {
+    color: var(--text-primary);
+  }
+  .solutions__tab[aria-selected='true'] {
+    padding-left: 1.5rem;
+    color: var(--text-primary);
+  }
+  .solutions__tab::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0.625rem;
+    height: 0.625rem;
+    margin-top: -0.3125rem;
+    background: var(--accent);
+    transform: scale(0);
+    transition: transform var(--motion-standard) var(--ease);
+  }
+  .solutions__tab[aria-selected='true']::before {
+    transform: none;
+  }
+  .solutions__panels {
+    grid-column: 6 / -1;
+  }
+  .solution__name {
+    display: none;
+  }
+  .solution__text {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--col-gap);
+    margin-block: var(--space-8);
+  }
+  .solution__text dt {
+    margin-bottom: var(--space-2);
+  }
+  .solution__text dd {
+    font-size: 1.125rem;
+    line-height: 1.45;
+  }
+  @media (min-width: 62rem) {
+    :global(.js) .solution:not([data-active]) {
+      display: none;
+    }
+  }
+  @media (max-width: 61.99rem) {
+    .solutions__list {
+      display: none;
+    }
+    .solutions__panels {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: var(--space-16);
+    }
+    .solution__name {
+      display: block;
+      margin-top: var(--space-6);
+    }
+    .solution__text {
+      grid-template-columns: minmax(0, 1fr);
+      margin-block: var(--space-4) var(--space-6);
+    }
+    .solution__text dt {
+      display: none;
+    }
+  }
+  @media (min-width: 48rem) and (max-width: 61.99rem) {
+    .solutions__panels {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--col-gap);
+    }
+  }
+
+  /* ---------- scale continuum ---------- */
+  .scale {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr 1.8fr 2.6fr;
+    column-gap: var(--col-gap);
+  }
+  .scale__step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .scale__figure {
+    display: flex;
+    align-items: flex-end;
+    height: 7rem;
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .scale__shape {
+    display: block;
+    width: min(100%, calc(var(--w) * 0.26rem));
+    height: calc(var(--h) * 0.2rem);
+    border: 1.5px solid var(--text-primary);
+    border-bottom: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(1.5rem - 1px),
+      var(--border-subtle) calc(1.5rem - 1px) 1.5rem
+    );
+  }
+  .scale__step:nth-child(3) .scale__shape {
+    border-color: var(--accent);
+  }
+  .scale__system {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .scale__capacity {
+    margin-top: var(--space-2);
+    font-size: 1.125rem;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--accent);
+  }
+  .scale__note {
+    margin-top: var(--space-8);
+  }
+  @media (max-width: 61.99rem) {
+    .scale {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .scale__step {
+      display: grid;
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+      column-gap: var(--space-6);
+      padding-block: var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .scale__figure {
+      grid-row: 1 / span 3;
+      height: 4.5rem;
+      margin: 0;
+      border-bottom: 0;
+      align-self: end;
+    }
+    .scale__shape {
+      width: calc(var(--w) * 0.09rem);
+      height: calc(var(--h) * 0.14rem);
+      border-bottom: 1.5px solid var(--text-primary);
+      background: none;
+    }
+    .scale__system {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* ---------- products ---------- */
+  .products {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(3rem, 6vw, 6rem) var(--col-gap);
+  }
+  .product__media {
+    display: block;
+  }
+  .product__media :global(img) {
+    transition: transform var(--motion-editorial) var(--ease);
+  }
+  .product:hover .product__media :global(img) {
+    transform: scale(1.02);
+  }
+  .product__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-right: var(--space-8);
+  }
+  .product__capacity {
+    color: var(--text-primary);
+  }
+  .product__body :global(.btn) {
+    margin-top: var(--space-3);
+  }
+  .controls-row {
+    row-gap: var(--space-4);
+    margin-top: clamp(3rem, 6vw, 6rem);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .controls-row__label {
+    grid-column: 1 / span 3;
+    padding-top: 0.4em;
+  }
+  .controls-row__title {
+    grid-column: 4 / span 4;
+  }
+  .controls-row__text {
+    grid-column: 8 / -1;
+  }
+  @media (max-width: 47.99rem) {
+    .products {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    /* Phone chapters: one image, one figure, one action. */
+    .product__media {
+      margin-inline: calc(-1 * var(--gutter));
+    }
+    .product__body {
+      padding-right: 0;
+    }
+  }
+  @media (max-width: 61.99rem) {
+    .controls-row > * {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* ---------- workflows ---------- */
+  .workflow {
+    display: grid;
+    counter-reset: none;
+    margin-top: var(--space-12);
+    border-top: 1px solid var(--border-strong);
+  }
+  .workflow--6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .workflow--7 {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    margin-top: 0;
+  }
+  .workflow > li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-4) var(--space-6) 0;
+  }
+  .workflow > li + li {
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--border-subtle);
+  }
+  .workflow > li:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--accent);
+  }
+  .workflow__name {
+    font-size: clamp(1.0625rem, 1.5vw, 1.375rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .workflow__items {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: var(--space-2);
+    line-height: 1.35;
+  }
+  .modular__action {
+    margin-top: var(--space-12);
+  }
+  @media (max-width: 61.99rem) {
+    .workflow--6,
+    .workflow--7 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .workflow > li,
+    .workflow > li + li {
+      display: grid;
+      grid-template-columns: 2.25rem minmax(0, 1fr);
+      align-items: baseline;
+      padding: var(--space-3) 0;
+      border-left: 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .workflow > li::after {
+      display: none;
+    }
+    .workflow__items {
+      grid-column: 2;
+      margin: 0;
+    }
+    .workflow__name {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* ---------- flagship ---------- */
+  .flagship__rail {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: var(--space-8) 0 0;
+    border-top: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .flagship__rail > div {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-4) var(--space-6) 0;
+  }
+  .flagship__rail > div + div {
+    padding-left: var(--space-6);
+    border-left: 1px solid var(--border-subtle);
+  }
+  .flagship__foot {
+    row-gap: var(--space-8);
+    align-items: start;
+    margin-top: var(--space-12);
+  }
+  .flagship__foot .lead {
+    grid-column: 1 / span 7;
+  }
+  .flagship__foot > div {
+    grid-column: 10 / -1;
+    justify-self: end;
+  }
+  @media (max-width: 61.99rem) {
+    .flagship__rail {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .flagship__rail > div {
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .flagship__rail > div:nth-child(odd) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .flagship__rail > div:nth-child(n + 3) {
+      display: none;
+    }
+    .flagship__foot > * {
+      grid-column: 1 / -1 !important;
+      justify-self: start !important;
+    }
+  }
+
+  /* ---------- reliability ---------- */
+  .reliability {
+    row-gap: var(--space-12);
+    align-items: start;
+  }
+  .reliability__media {
+    grid-column: 1 / span 5;
+  }
+  .reliability__points {
+    grid-column: 7 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    margin: 0;
+    border-top: 1px solid var(--border-strong);
+  }
+  .reliability__points > div {
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .reliability__points dt {
+    margin-bottom: var(--space-2);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  @media (max-width: 61.99rem) {
+    .reliability__media,
+    .reliability__points {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .reliability__points {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .reliability__media {
+      margin-inline: calc(-1 * var(--gutter));
+    }
+    .reliability__media :global(figcaption) {
+      padding-inline: var(--gutter);
+    }
+  }
+
+  /* ---------- engineering ---------- */
+  .engineering__artifact {
+    align-items: start;
+    margin-top: clamp(3rem, 6vw, 6rem);
+  }
+  .engineering__artifact :global(.engineering__figure) {
+    grid-column: 1 / span 8;
+    padding: var(--space-6);
+    border: 1px solid var(--border-subtle);
+  }
+  .engineering__aside {
+    grid-column: 10 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+  }
+  .engineering__list {
+    width: 100%;
+    border-top: 1px solid var(--border-strong);
+  }
+  .engineering__list li {
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .engineering__more {
+    margin-top: var(--space-8);
+  }
+
+  /* ---------- global deployment ---------- */
+  .regions {
+    border-top: 1px solid var(--border-strong);
+  }
+  .regions__row {
+    row-gap: var(--space-3);
+    align-items: baseline;
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .regions__name {
+    grid-column: 1 / span 5;
+    font-size: var(--type-h3);
+  }
+  .regions__refs {
+    grid-column: 7 / -1;
+  }
+  .regions__refs ul {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .regions__refs a {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr) auto;
+    gap: var(--space-4);
+    align-items: baseline;
+    text-decoration: none;
+  }
+  .regions__refs a:hover {
+    color: var(--accent);
+  }
+  .regions__refs a:hover .label {
+    color: inherit;
+  }
+  .regions__note {
+    margin-top: var(--space-6);
+  }
+  @media (max-width: 61.99rem) {
+    .regions__name,
+    .regions__refs {
+      grid-column: 1 / -1;
+    }
+    .regions__refs a {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .regions__refs a .label {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* ---------- mobile narrative order (spec §39.3) ---------- */
+  @media (max-width: 47.99rem) {
+    .home {
+      display: flex;
+      flex-direction: column;
+    }
+    .home > [data-chapter='hero'] {
+      order: 1;
+    }
+    .home > [data-chapter='proof'] {
+      order: 2;
+    }
+    .home > [data-chapter='products'] {
+      order: 3;
+    }
+    .home > [data-chapter='scale'] {
+      order: 4;
+    }
+    .home > [data-chapter='architecture'] {
+      order: 5;
+    }
+    .home > [data-chapter='solutions'] {
+      order: 6;
+    }
+    .home > [data-chapter='modular'] {
+      order: 7;
+    }
+    .home > [data-chapter='flagship'] {
+      order: 8;
+    }
+    .home > [data-chapter='reliability'] {
+      order: 9;
+    }
+    .home > [data-chapter='engineering'] {
+      order: 10;
+    }
+    .home > [data-chapter='deployment'] {
+      order: 11;
+    }
+    .home > [data-chapter='cta'] {
+      order: 12;
+    }
+    .hero__media {
+      padding-inline: 0;
+    }
+    .hero__media :global(figcaption) {
+      padding-inline: var(--gutter);
+    }
+    .hero .lead {
+      font-size: 1.0625rem;
+    }
+  }
+  @media (max-width: 61.99rem) {
+    .hero__title,
+    .hero__body {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

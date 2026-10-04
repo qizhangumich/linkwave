@@ -1,177 +1,50 @@
-# LinkOne - Digital Cards & Top-up Services
+# linkwave.sg
 
-A modern, responsive website for selling digital cards and top-up services built with Next.js, TypeScript, and TailwindCSS.
+LINKWAVE website, built to `instruction/LINKWAVE_GLOBAL_WEBSITE_UI_UX_BUILD_SPEC_v2.md`.
+Astro (static output), TypeScript, plain CSS with design tokens, no UI framework.
 
-## Features
-
-- 🎁 **Gift Cards** - Amazon, Apple, Google Play, Steam
-- 🎮 **Game Cards** - PlayStation, Xbox, Nintendo, Steam
-- 🌍 **eSIM Cards** - International data cards
-- 💳 **Virtual Cards** - Other digital payment cards
-- 🔄 **Direct Top-up** - ChatGPT Plus, OpenAI Credits, Midjourney, and more
-- 🛒 **Shopping Cart** - Full cart functionality with quantity management
-- 🌙 **Dark/Light Theme** - Toggle between themes
-- 📱 **Responsive Design** - Works on all devices
-- ⚡ **Instant Delivery** - Fast and secure digital delivery
-
-## Tech Stack
-
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **Icons**: Lucide React
-- **State Management**: React Context API
-- **Image Optimization**: Next.js Image component
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd linkone-digital-cards
-```
-
-2. Install dependencies:
 ```bash
 npm install
-# or
-yarn install
+npm run dev       # http://localhost:4321, shows [TBD] and unapproved fields
+npm run build     # type-check + static build to dist/, hides them
+npm run preview
 ```
 
-3. Run the development server:
-```bash
-npm run dev
-# or
-yarn dev
-```
+## What is built
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+| Route | Content |
+| --- | --- |
+| `/` | Homepage, all sections of spec §12 plus the reliability section of §43 |
+| `/solutions/[slug]/` | 5 solution pages: AI data centers, hyperscale, HPC, colocation, modular AI infrastructure |
+| `/products/`, `/products/[slug]/` | Index + 4 products: centralized CDU, primary pump stations, manifolds and distribution, liquid-cooled racks |
+| `/modular-cooling/` | Prefabricated thermal infrastructure, following spec §16 |
+| `/projects/`, `/projects/[slug]/` | Index + 4 case studies: US 2.5 MW, US pump station, Singapore pump station, China 500 kW |
+| `/engineering/` | Engineering page, following spec §15 |
+| `/resources/` | Documentation issued on request |
+| `/contact/` | RFQ form with validation, file upload, draft saving, success and error states |
 
-## Project Structure
+Not built, because the source material does not support them: rack and in-row CDU product pages
+(no specifications supplied), a controls product page, a company page (legal entity, location
+and history of LINKWAVE not supplied), technical guides and insights (no articles), privacy and
+terms (need legal review).
 
-```
-├── components/          # Reusable React components
-│   ├── CardItem.tsx    # Card display component
-│   ├── NavBar.tsx      # Navigation bar
-│   └── Footer.tsx      # Footer component
-├── contexts/           # React Context providers
-│   ├── ThemeContext.tsx    # Theme management
-│   └── CartContext.tsx     # Shopping cart state
-├── pages/              # Next.js pages
-│   ├── index.tsx       # Homepage
-│   ├── cards.tsx       # Cards store
-│   ├── topup.tsx       # Direct top-up page
-│   ├── cart.tsx        # Shopping cart
-│   └── api/            # API routes
-├── styles/             # Global styles
-│   └── globals.css     # TailwindCSS imports
-└── public/             # Static assets
-```
+## Where things live
 
-## Pages
+- `src/styles/tokens.css` — colour, type, spacing, motion tokens.
+- `src/content/` — all copy and data, kept out of components for later localization.
+  - `claims.ts` — claim register (spec §30). Every public figure points to a source page.
+  - `products.ts`, `projects.ts` — structured content (spec §29), including the deployment dataset (§43.2).
+  - `home.ts`, `site.ts` — homepage copy, navigation, CTAs.
+- `src/lib/publish.ts` — publication gate. Rows with status `tbd` or `needs-approval` render in
+  `npm run dev` with a red marker and are omitted from production builds.
+- `src/components/` — Header, Footer, Button, Figure, SectionHeader, MetricRail, SystemDiagram,
+  SpecTable, Breadcrumb, CtaBand, RFQForm, MobileCta.
 
-### Homepage (`/`)
-- Hero section with call-to-action
-- Category showcase
-- Featured cards grid
-- Why choose us section
-
-### Cards Store (`/cards`)
-- Browse all digital cards
-- Filter by category
-- Search functionality
-- Sort options
-- Grid/List view toggle
-
-### Direct Top-up (`/topup`)
-- Service selection
-- Amount input with validation
-- Account information form
-- Add to cart functionality
-
-### Shopping Cart (`/cart`)
-- Review cart items
-- Quantity management
-- Order summary
-- Checkout preparation
-
-## Features in Detail
-
-### Theme System
-- Light and dark mode support
-- Persistent theme preference
-- Smooth transitions
-- System preference detection
-
-### Shopping Cart
-- Add/remove items
-- Quantity management
-- Persistent storage
-- Real-time total calculation
-
-### Responsive Design
-- Mobile-first approach
-- Tablet and desktop optimized
-- Touch-friendly interactions
-- Accessible navigation
-
-## Customization
-
-### Adding New Card Categories
-1. Update the `categories` array in `pages/cards.tsx`
-2. Add new card data to the `allCards` array
-3. Update the category filter logic
-
-### Adding New Top-up Services
-1. Add new service to the `topUpServices` array in `pages/topup.tsx`
-2. Configure pricing, limits, and processing time
-3. Add appropriate icon and description
-
-### Styling
-- Modify `tailwind.config.js` for theme customization
-- Update `styles/globals.css` for global styles
-- Use TailwindCSS classes for component styling
-
-## API Integration
-
-The project is ready for API integration:
-- Payment processing (Stripe, PayPal, etc.)
-- Inventory management
-- Order processing
-- User authentication
-- Email notifications
+Desktop and mobile are composed separately (spec §39): the phone layout reorders the homepage
+chapters, drops secondary copy, turns the architecture diagram into a vertical journey and
+spec tables into data blocks, and adds a sticky "Talk to an Engineer" bar.
 
 ## Deployment
 
-### Vercel (Recommended)
-1. Push code to GitHub
-2. Connect repository to Vercel
-3. Deploy automatically
-
-### Other Platforms
-1. Build the project: `npm run build`
-2. Start production server: `npm start`
-3. Deploy the `.next` folder
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Support
-
-For support, email support@linkone.com or create an issue in the repository.
+Pushes to `master` deploy to Vercel (`vercel.json` sets the Astro preset). Set
+`PUBLIC_RFQ_ENDPOINT` in the Vercel project's environment variables to connect the enquiry form.

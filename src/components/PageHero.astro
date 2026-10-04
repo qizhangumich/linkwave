@@ -1,0 +1,70 @@
+---
+import Breadcrumb from './Breadcrumb.astro';
+
+interface Props {
+  crumbs: { label: string; href?: string }[];
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+}
+const { crumbs, eyebrow, title, lead } = Astro.props;
+---
+
+<header class="page-hero">
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    {eyebrow && <p class="label page-hero__eyebrow">{eyebrow}</p>}
+    <div class="grid page-hero__head">
+      <h1 class="h1 page-hero__title">{title}</h1>
+      <div class="page-hero__body">
+        {lead && <p class="lead">{lead}</p>}
+        <div class="page-hero__actions"><slot name="actions" /></div>
+      </div>
+    </div>
+    <slot />
+  </div>
+</header>
+
+<style>
+  .page-hero {
+    padding-block: var(--space-8) var(--section-pad);
+  }
+  .page-hero__eyebrow {
+    margin-top: clamp(2rem, 5vw, 4.5rem);
+  }
+  .page-hero__head {
+    row-gap: var(--space-8);
+    align-items: end;
+    margin-block: var(--space-6) clamp(2.5rem, 5vw, 4.5rem);
+  }
+  .page-hero__eyebrow + .page-hero__head {
+    margin-top: var(--space-6);
+  }
+  .page-hero__head:first-of-type {
+    margin-top: clamp(2rem, 5vw, 4.5rem);
+  }
+  .page-hero__eyebrow + .page-hero__head:first-of-type {
+    margin-top: var(--space-6);
+  }
+  .page-hero__title {
+    grid-column: 1 / span 7;
+  }
+  .page-hero__body {
+    grid-column: 8 / -1;
+  }
+  .page-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+  .page-hero__actions:empty {
+    display: none;
+  }
+  @media (max-width: 61.99rem) {
+    .page-hero__title,
+    .page-hero__body {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

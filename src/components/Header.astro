@@ -1,0 +1,218 @@
+---
+import Button from './Button.astro';
+import { cta, nav, site } from '@/content/site';
+---
+
+<header class="header" data-header>
+  <div class="container header__inner">
+    <a class="wordmark" href="/" aria-label={`${site.name} home`}>{site.name}</a>
+
+    <nav class="header__nav" aria-label="Primary">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__cta">
+      <Button href={cta.primary.href}>{cta.primary.label}</Button>
+    </div>
+
+    <button
+      class="header__toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+      data-nav-toggle
+    >
+      <span class="visually-hidden">Menu</span>
+      <span class="header__bars" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <div class="mobile-nav" id="mobile-nav" hidden>
+    <nav class="container" aria-label="Mobile">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+      <Button href={cta.primary.href}>{cta.primary.label}</Button>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const sheet = document.getElementById('mobile-nav');
+
+  const onScroll = () => header?.toggleAttribute('data-scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const setOpen = (open: boolean) => {
+    if (!toggle || !sheet) return;
+    toggle.setAttribute('aria-expanded', String(open));
+    sheet.hidden = !open;
+    document.documentElement.classList.toggle('nav-open', open);
+  };
+  toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  sheet?.addEventListener('click', (event) => {
+    if ((event.target as HTMLElement).closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--surface-primary);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--motion-standard) var(--ease);
+  }
+  .header[data-scrolled] {
+    border-bottom-color: var(--border-subtle);
+  }
+  .header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    height: var(--header-h);
+  }
+  .wordmark {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+  }
+  .header__nav {
+    margin-left: auto;
+  }
+  .header__nav ul {
+    display: flex;
+    gap: clamp(1rem, 2.2vw, 2.25rem);
+  }
+  .header__nav a {
+    position: relative;
+    padding-block: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease);
+  }
+  .header__nav a::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--motion-standard) var(--ease);
+  }
+  .header__nav a:hover {
+    color: var(--text-primary);
+  }
+  .header__nav a:hover::after {
+    transform: scaleX(1);
+  }
+  .header__cta :global(.btn) {
+    min-height: 2.5rem;
+  }
+
+  .header__toggle {
+    display: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: -0.625rem;
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .header__bars,
+  .header__bars::before {
+    display: block;
+    width: 1.375rem;
+    height: 1.5px;
+    margin-inline: auto;
+    background: currentColor;
+    transition: transform var(--motion-standard) var(--ease);
+  }
+  .header__bars::before {
+    content: '';
+    transform: translateY(7px);
+  }
+  .header__bars {
+    transform: translateY(-3.5px);
+  }
+  [aria-expanded='true'] .header__bars {
+    transform: rotate(45deg);
+  }
+  [aria-expanded='true'] .header__bars::before {
+    transform: rotate(-90deg);
+  }
+
+  .mobile-nav {
+    position: fixed;
+    inset: var(--header-h) 0 0;
+    overflow-y: auto;
+    background: var(--surface-primary);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .mobile-nav nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    padding-block: var(--space-6) var(--space-12);
+  }
+  .mobile-nav li {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .mobile-nav li a {
+    display: block;
+    padding-block: 1.125rem;
+    font-size: 1.75rem;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+  }
+  .mobile-nav :global(.btn) {
+    align-self: flex-start;
+  }
+
+  @media (max-width: 65.99rem) {
+    .header__nav,
+    .header__cta {
+      display: none;
+    }
+    .header__toggle {
+      display: block;
+    }
+  }
+  @media (min-width: 66rem) {
+    .mobile-nav {
+      display: none;
+    }
+  }
+  :global(html.nav-open) {
+    overflow: hidden;
+  }
+</style>

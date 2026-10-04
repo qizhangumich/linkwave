@@ -1,0 +1,90 @@
+---
+import type { Metric } from '@/content/types';
+import { isFlagged, isPublic } from '@/lib/publish';
+
+interface Props {
+  metrics: Metric[];
+  size?: 'xl' | 'l';
+  footnote?: string;
+  /** Index of the metric the footnote refers to. */
+  footnoteFor?: number;
+}
+const { metrics, size = 'l', footnote, footnoteFor } = Astro.props;
+const visible = metrics.filter((m) => isPublic(m.status));
+---
+
+<div class="metric-rail">
+  <dl class:list={['metric-rail__list', `metric-rail__list--${visible.length}`]}>
+    {
+      visible.map((metric, i) => (
+        <div class="metric">
+          <dt class="label">
+            {metric.label}
+            {isFlagged(metric.status) && <span class="tbd"> [{metric.note ?? 'unapproved'}]</span>}
+          </dt>
+          <dd class:list={['data', `data--${size}`]}>
+            {metric.value}
+            {metric.unit && <span class="unit">{metric.unit}</span>}
+            {footnote && footnoteFor === i && <sup class="metric__mark">*</sup>}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+  {footnote && <p class="metric-rail__footnote small muted">* {footnote}</p>}
+</div>
+
+<style>
+  .metric-rail__list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    border-top: 1px solid var(--border-strong);
+  }
+  .metric-rail__list--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .metric-rail__list--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .metric {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-6) var(--space-8) 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .metric + .metric {
+    padding-left: var(--space-6);
+    border-left: 1px solid var(--border-subtle);
+  }
+  .metric dt {
+    max-width: 14em;
+  }
+  .metric dd {
+    white-space: nowrap;
+  }
+  .metric__mark {
+    font-size: 0.35em;
+    vertical-align: super;
+    color: var(--text-secondary);
+  }
+  .metric-rail__footnote {
+    margin-top: var(--space-4);
+    max-width: 48em;
+  }
+  @media (max-width: 61.99rem) {
+    .metric-rail__list,
+    .metric-rail__list--3 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .metric-rail__list .metric:nth-child(odd) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .metric dd {
+      white-space: normal;
+    }
+  }
+</style>

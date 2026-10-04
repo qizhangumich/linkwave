@@ -1,0 +1,49 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  /** Heading level for correct document outline. */
+  as?: 'h1' | 'h2';
+  size?: 'h1' | 'h2';
+}
+const { eyebrow, title, lead, as: Tag = 'h2', size = 'h2' } = Astro.props;
+---
+
+<header class="section-header grid">
+  {eyebrow && <p class="label section-header__eyebrow">{eyebrow}</p>}
+  <Tag class:list={[size, 'section-header__title']}>{title}</Tag>
+  {lead && <p class="lead section-header__lead">{lead}</p>}
+  <div class="section-header__aside"><slot /></div>
+</header>
+
+<style>
+  .section-header {
+    row-gap: var(--space-6);
+    padding-top: var(--space-6);
+    margin-bottom: clamp(2.5rem, 5vw, 5rem);
+    border-top: 1px solid var(--border-strong);
+  }
+  .section-header__eyebrow {
+    grid-column: 1 / span 3;
+    padding-top: 0.5em;
+  }
+  .section-header__title {
+    grid-column: 4 / span 8;
+    max-width: 17em;
+  }
+  .section-header__lead {
+    grid-column: 4 / span 6;
+  }
+  .section-header__aside {
+    grid-column: 4 / -1;
+  }
+  .section-header__aside:empty {
+    display: none;
+  }
+  @media (max-width: 61.99rem) {
+    .section-header > * {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

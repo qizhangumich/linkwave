@@ -1,0 +1,109 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import LinkList from '@/components/LinkList.astro';
+import PageHero from '@/components/PageHero.astro';
+import { resourcesPage as page } from '@/content/pages';
+import { products } from '@/content/products';
+import { cta } from '@/content/site';
+import { showUnapproved } from '@/lib/publish';
+
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Resources' }];
+---
+
+<Base title="Resources" description={page.metaDescription}>
+  <PageHero crumbs={crumbs} eyebrow={page.eyebrow} title={page.title} lead={page.lead}>
+    <Fragment slot="actions">
+      <Button href={cta.package.href}>{cta.package.label}</Button>
+    </Fragment>
+    <div class="docs">
+      {
+        page.groups.map((group) => (
+          <section class="docs__group">
+            <h2 class="h3">{group.name}</h2>
+            <p class="small muted">{group.note}</p>
+            <LinkList items={group.documents.map((label) => ({ label }))} />
+          </section>
+        ))
+      }
+    </div>
+    {
+      showUnapproved && (
+        <p class="tbd docs__pending">
+          [TBD, hidden in production] {page.pending.join(' · ')}
+        </p>
+      )
+    }
+  </PageHero>
+
+  <section class="section section--tint">
+    <div class="container grid specs">
+      <div class="specs__intro">
+        <p class="label">Specifications online</p>
+        <h2 class="h2">Published specification tables.</h2>
+        <p class="lead">
+          Reference specifications for each equipment family are on the product pages, in SI units
+          with US customary equivalents.
+        </p>
+      </div>
+      <div class="specs__list">
+        <LinkList
+          items={products.map((p) => ({
+            label: p.name,
+            href: `/products/${p.slug}/#specifications`,
+            meta: p.capacityRange ?? p.category,
+          }))}
+        />
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    tint={false}
+    title="Need a document for your evaluation?"
+    copy="Tell us the system and the document. Where material is project-specific or confidential, we will say what can be shared and when."
+    primary={cta.package}
+    secondary={cta.primary}
+  />
+</Base>
+
+<style>
+  .docs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-12) var(--col-gap);
+  }
+  .docs__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .docs__group :global(.link-list) {
+    margin-top: var(--space-4);
+  }
+  .docs__pending {
+    margin-top: var(--space-8);
+  }
+  .specs {
+    row-gap: var(--space-12);
+    align-items: start;
+  }
+  .specs__intro {
+    grid-column: 1 / span 6;
+    display: grid;
+    gap: var(--space-6);
+  }
+  .specs__list {
+    grid-column: 8 / -1;
+  }
+  @media (max-width: 61.99rem) {
+    .docs {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .specs__intro,
+    .specs__list {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

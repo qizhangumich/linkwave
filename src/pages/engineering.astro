@@ -1,0 +1,303 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import DefGrid from '@/components/DefGrid.astro';
+import Figure from '@/components/Figure.astro';
+import PageHero from '@/components/PageHero.astro';
+import SectionHeader from '@/components/SectionHeader.astro';
+import SystemDiagram from '@/components/SystemDiagram.astro';
+import { engineeringPage as page } from '@/content/pages';
+import { engineering } from '@/content/home';
+import { cta } from '@/content/site';
+import { showUnapproved } from '@/lib/publish';
+
+import pumpPid from '@/assets/images/pump-station-pid.jpg';
+import cfd from '@/assets/images/cfd-cold-plate.jpg';
+
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Engineering' }];
+const pad = (n: number) => String(n).padStart(2, '0');
+const supportItems = [...page.support.items, ...(showUnapproved ? page.support.pending : [])];
+---
+
+<Base title="Engineering" description={page.metaDescription}>
+  <PageHero crumbs={crumbs} eyebrow={page.eyebrow} title={page.title} lead={page.lead}>
+    <Fragment slot="actions">
+      <Button href={cta.primary.href}>{cta.primary.label}</Button>
+      <Button href={cta.package.href} variant="secondary" arrow={false}>{cta.package.label}</Button>
+    </Fragment>
+    <ol class="eflow">
+      {
+        engineering.steps.map((step, i) => (
+          <li>
+            <span class="label">{pad(i + 1)}</span>
+            <span class="eflow__name">{step.name}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </PageHero>
+
+  <!-- Requirements definition -->
+  <section class="section section--tint" id="requirements">
+    <div class="container">
+      <SectionHeader eyebrow="01 Define" title={page.requirements.title} lead={page.requirements.body} />
+      <ul class="inputs">
+        {
+          page.requirements.inputs.map((input) => (
+            <li>{input}</li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Thermal and hydraulic -->
+  <section class="section" id="thermal-hydraulic">
+    <div class="container">
+      <SectionHeader eyebrow="02 Model" title={page.thermal.title} lead={page.thermal.body} />
+      <div class="eartifact">
+        <Figure
+          src={pumpPid}
+          alt={page.thermal.alt}
+          caption={page.thermal.caption}
+          fit="contain"
+          sizes="(min-width: 90rem) 1360px, 100vw"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- CFD -->
+  <section class="section inverse" id="simulation">
+    <div class="container grid esim">
+      <div class="esim__text">
+        <p class="label">Simulation</p>
+        <h2 class="h2">{page.cfd.title}</h2>
+        <p class="lead">{page.cfd.body}</p>
+      </div>
+      <div class="esim__media">
+        <Figure
+          src={cfd}
+          alt={page.cfd.alt}
+          caption={page.cfd.caption}
+          sizes="(min-width: 62rem) 45vw, 100vw"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- System architecture -->
+  <section class="section section--tint" id="architecture">
+    <div class="container">
+      <SectionHeader
+        eyebrow="03 Engineer"
+        title={page.architecture.title}
+        lead={page.architecture.body}
+      />
+      <SystemDiagram active="secondary-loop" />
+    </div>
+  </section>
+
+  <!-- Controls -->
+  <section class="section" id="controls">
+    <div class="container">
+      <SectionHeader eyebrow="Controls" title={page.controls.title} lead={page.controls.body} />
+      <DefGrid items={page.controls.items} columns={2} />
+    </div>
+  </section>
+
+  <!-- Reliability -->
+  <section class="section section--tint" id="reliability">
+    <div class="container">
+      <SectionHeader eyebrow="Reliability" title={page.reliability.title} lead={page.reliability.body} />
+      <DefGrid items={page.reliability.items} />
+    </div>
+  </section>
+
+  <!-- Build and FAT -->
+  <section class="section" id="factory-acceptance">
+    <div class="container">
+      <SectionHeader eyebrow="04–05 Build and test" title={page.delivery.title} lead={page.delivery.body} />
+      <ol class="stages">
+        {
+          page.delivery.stages.map((stage) => (
+            <li class:list={[stage.code === 'T5' && 'stages__item--key']}>
+              <span class="label">{stage.code}</span>
+              <h3 class="stages__name">{stage.name}</h3>
+              <ul class="small muted">
+                {stage.items.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Commissioning and support -->
+  <section class="section section--tint" id="support">
+    <div class="container">
+      <SectionHeader eyebrow="06–07 Deploy and support" title={page.support.title} lead={page.support.body} />
+      <dl class="esupport">
+        {
+          supportItems.map((item) => (
+            <div>
+              <dt>
+                {item.title}
+                {item.status && <span class="tbd"> [needs approval]</span>}
+              </dt>
+              <dd class="muted">{item.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <CtaBand
+    tint={false}
+    title="Have a load and a set of constraints?"
+    copy="That is enough to start. Send what you have, and an engineer will come back with an architecture and the questions that need answering."
+  />
+</Base>
+
+<style>
+  .eflow {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    border-top: 1px solid var(--border-strong);
+  }
+  .eflow li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-4) var(--space-6) 0;
+  }
+  .eflow li + li {
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--border-subtle);
+  }
+  .eflow__name {
+    font-size: clamp(1.0625rem, 1.5vw, 1.375rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .inputs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+  }
+  .inputs li {
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .eartifact {
+    padding: clamp(1rem, 3vw, 2.5rem);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .esim {
+    row-gap: var(--space-12);
+    align-items: center;
+  }
+  .esim__text {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: var(--space-6);
+  }
+  .esim__media {
+    grid-column: 7 / -1;
+  }
+
+  .stages {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    border-top: 1px solid var(--border-strong);
+  }
+  .stages > li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-4) var(--space-6) 0;
+  }
+  .stages > li + li {
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--border-subtle);
+  }
+  .stages__name {
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+  .stages ul {
+    display: grid;
+    gap: 0.35rem;
+    line-height: 1.35;
+  }
+  .stages__item--key .label,
+  .stages__item--key .stages__name {
+    color: var(--accent);
+  }
+
+  .esupport {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    margin: 0;
+  }
+  .esupport > div {
+    padding-block: var(--space-6) var(--space-8);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .esupport dt {
+    margin-bottom: var(--space-3);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  @media (max-width: 61.99rem) {
+    .eflow,
+    .stages {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .eflow li,
+    .eflow li + li,
+    .stages > li,
+    .stages > li + li {
+      padding-left: 0;
+      border-left: 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .inputs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .esim__text,
+    .esim__media {
+      grid-column: 1 / -1;
+    }
+    .esupport {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .eflow {
+      display: none;
+    }
+    .stages {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .inputs li {
+      font-size: 1.0625rem;
+    }
+  }
+</style>

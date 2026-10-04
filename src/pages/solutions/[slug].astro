@@ -1,0 +1,207 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import DefGrid from '@/components/DefGrid.astro';
+import Figure from '@/components/Figure.astro';
+import LinkList from '@/components/LinkList.astro';
+import PageHero from '@/components/PageHero.astro';
+import SectionHeader from '@/components/SectionHeader.astro';
+import SystemDiagram from '@/components/SystemDiagram.astro';
+import { products } from '@/content/products';
+import { projects } from '@/content/projects';
+import { cta, site } from '@/content/site';
+import { arrangements, solutions, type Solution } from '@/content/solutions';
+
+export const getStaticPaths = (() =>
+  solutions.map((s) => ({ params: { slug: s.id }, props: { solution: s } }))) satisfies GetStaticPaths;
+
+interface Props {
+  solution: Solution;
+}
+const { solution } = Astro.props;
+
+const used = solution.products.map((slug) => products.find((p) => p.slug === slug)!);
+const reference = projects.find(
+  (p) => p.slug === solution.project && (site.previewUnapprovedProjects || p.publicationApproved),
+);
+const others = solutions.filter((s) => s.id !== solution.id);
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Solutions', href: '/#solutions' },
+  { label: solution.name },
+];
+const url = new URL(`/solutions/${solution.id}/`, Astro.site).href;
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.label,
+      item: c.href ? new URL(c.href, Astro.site).href : url,
+    })),
+  },
+];
+---
+
+<Base
+  title={`${solution.name} liquid cooling`}
+  description={solution.metaDescription}
+  schema={schema}
+  ogImage={solution.image.src}
+>
+  <PageHero crumbs={crumbs} eyebrow={solution.name} title={solution.proposition} lead={solution.response}>
+    <Fragment slot="actions">
+      <Button href={cta.primary.href}>{cta.primary.label}</Button>
+      <Button href="#architecture" variant="secondary">Explore the Architecture</Button>
+    </Fragment>
+    <Figure
+      src={solution.image}
+      alt={solution.alt}
+      caption={solution.caption}
+      ratio="21 / 10"
+      mobileRatio="4 / 5"
+      sizes="(min-width: 90rem) 1360px, 100vw"
+      eager
+    />
+  </PageHero>
+
+  <section class="section section--tint">
+    <div class="container">
+      <SectionHeader eyebrow="Engineering challenge" title={solution.challenge} />
+      <DefGrid items={solution.challenges} />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <SectionHeader eyebrow="LINKWAVE response" title="How the system is built." />
+      <DefGrid items={solution.approach} numbered />
+    </div>
+  </section>
+
+  <section class="section section--tint" id="architecture">
+    <div class="container">
+      <SectionHeader
+        eyebrow="System architecture"
+        title="Where the work happens in the loop."
+        lead="The same chain applies to every project. What changes is where capacity, redundancy and control are placed."
+      />
+      <SystemDiagram active={solution.architectureNode} />
+      <div class="grid arrangements">
+        <h3 class="label arrangements__label">Heat-rejection arrangements</h3>
+        <div class="arrangements__grid">
+          <DefGrid items={arrangements.map((a) => ({ title: a.name, body: a.body }))} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid smeta">
+      <div class="smeta__col">
+        <h2 class="label">Design inputs we ask for</h2>
+        <LinkList items={solution.designInputs.map((label) => ({ label }))} />
+      </div>
+      <div class="smeta__col">
+        <h2 class="label">Systems used</h2>
+        <LinkList
+          items={used.map((p) => ({
+            label: p.name,
+            href: `/products/${p.slug}/`,
+            meta: p.capacityRange,
+          }))}
+        />
+      </div>
+      <div class="smeta__col">
+        <h2 class="label">Reference project</h2>
+        {
+          reference ? (
+            <LinkList
+              items={[
+                {
+                  label: reference.title,
+                  href: `/projects/${reference.slug}/`,
+                  meta: reference.country,
+                },
+              ]}
+            />
+          ) : (
+            <p class="muted smeta__text">
+              No public reference is available for this application yet. Related projects are listed
+              under <a href="/projects/">Projects</a>.
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container grid smeta">
+      <h2 class="label smeta__others-label">Other workloads</h2>
+      <div class="smeta__others">
+        <LinkList
+          items={others.map((s) => ({ label: s.name, href: `/solutions/${s.id}/`, meta: s.proposition }))}
+        />
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    tint={false}
+    title={`Planning a ${solution.name === 'HPC' ? 'liquid-cooled HPC system' : 'liquid-cooled facility'}?`}
+    copy="Send the load, rack density and facility constraints. An engineer will respond with an architecture and the open questions."
+  />
+</Base>
+
+<style>
+  .arrangements {
+    row-gap: var(--space-4);
+    margin-top: clamp(3rem, 6vw, 6rem);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border-strong);
+  }
+  .arrangements__label {
+    grid-column: 1 / span 3;
+    padding-top: 0.4em;
+  }
+  .arrangements__grid {
+    grid-column: 4 / -1;
+  }
+  .arrangements__grid :global(.def-grid > div) {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .smeta {
+    row-gap: var(--space-12);
+  }
+  .smeta__col {
+    grid-column: span 4;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .smeta__text a {
+    color: var(--accent);
+  }
+  .smeta__others-label {
+    grid-column: 1 / span 3;
+    padding-top: 0.9rem;
+  }
+  .smeta__others {
+    grid-column: 4 / -1;
+  }
+  @media (max-width: 61.99rem) {
+    .arrangements__label,
+    .arrangements__grid,
+    .smeta__col,
+    .smeta__others-label,
+    .smeta__others {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

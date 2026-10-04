@@ -1,0 +1,58 @@
+---
+import Button from './Button.astro';
+import { cta } from '@/content/site';
+import { finalCta } from '@/content/home';
+
+interface Props {
+  title?: string;
+  copy?: string;
+  primary?: { label: string; href: string };
+  secondary?: { label: string; href: string };
+  tint?: boolean;
+}
+const {
+  title = finalCta.title,
+  copy = finalCta.copy,
+  primary = cta.primary,
+  secondary = cta.rfp,
+  tint = true,
+} = Astro.props;
+---
+
+<section class:list={['cta-band section', tint && 'section--tint']} aria-labelledby="cta-band-title">
+  <div class="container grid">
+    <h2 class="h1 cta-band__title" id="cta-band-title">{title}</h2>
+    <div class="cta-band__body">
+      <p class="lead">{copy}</p>
+      <div class="cta-band__actions">
+        <Button href={primary.href}>{primary.label}</Button>
+        <Button href={secondary.href} variant="secondary">{secondary.label}</Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band .grid {
+    row-gap: var(--space-12);
+    align-items: end;
+  }
+  .cta-band__title {
+    grid-column: 1 / span 7;
+  }
+  .cta-band__body {
+    grid-column: 9 / -1;
+  }
+  .cta-band__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+  @media (max-width: 61.99rem) {
+    .cta-band__title,
+    .cta-band__body {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

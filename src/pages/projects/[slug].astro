@@ -1,0 +1,363 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '@/layouts/Base.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import Figure from '@/components/Figure.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import { projects } from '@/content/projects';
+import { products } from '@/content/products';
+import { cta, site } from '@/content/site';
+import type { Project } from '@/content/types';
+import { isFlagged, isPublic } from '@/lib/publish';
+
+export const getStaticPaths = (() =>
+  projects
+    .filter((p) => site.previewUnapprovedProjects || p.publicationApproved)
+    .map((p) => ({ params: { slug: p.slug }, props: { project: p } }))) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+}
+const { project } = Astro.props;
+
+const used = products.filter((p) => project.productsUsed.includes(p.slug));
+const highlights = project.engineeringHighlights.filter((h) => isPublic(h.status));
+const capacity = project.capacity && isPublic(project.capacity.status) ? project.capacity : undefined;
+
+const keyData = [
+  capacity && {
+    label: capacity.label,
+    value: `${capacity.value} ${capacity.unit ?? ''}`.trim(),
+    flag: isFlagged(capacity.status) ? capacity.note : undefined,
+  },
+  project.rackCount && { label: 'Racks', value: String(project.rackCount) },
+  { label: 'Architecture', value: project.architecture },
+  { label: 'Region', value: project.country },
+  { label: 'Client', value: project.confidentialCustomerDescriptor },
+].filter((x): x is { label: string; value: string; flag?: string } => Boolean(x));
+
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Projects', href: '/projects/' },
+  { label: project.country },
+];
+const url = new URL(`/projects/${project.slug}/`, Astro.site).href;
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.label,
+      item: c.href ? new URL(c.href, Astro.site).href : url,
+    })),
+  },
+];
+---
+
+<Base
+  title={`${project.title}, ${project.country}`}
+  description={project.summary}
+  schema={schema}
+  ogImage={project.heroImage.src.src}
+>
+  <article>
+    <header class="case-head">
+      <div class="container">
+        <Breadcrumb items={crumbs} />
+        <p class="label case-head__eyebrow">{project.country} / {project.application}</p>
+        <div class="grid">
+          <h1 class="h1 case-head__title">{project.title}</h1>
+          <p class="lead case-head__summary">{project.summary}</p>
+        </div>
+        {
+          !project.publicationApproved && import.meta.env.DEV && (
+            <p class="tbd case-head__flag">
+              [Pending publication approval: customer naming and photography rights]
+            </p>
+          )
+        }
+      </div>
+      <div class="container case-head__media">
+        <Figure
+          src={project.heroImage.src}
+          alt={project.heroImage.alt}
+          caption={project.heroImage.caption}
+          ratio="21 / 10"
+          mobileRatio="4 / 5"
+          sizes="(min-width: 90rem) 1360px, 100vw"
+          eager
+        />
+      </div>
+    </header>
+
+    <section class="container case-data" aria-label="Key data">
+      <dl>
+        {
+          keyData.map((item) => (
+            <div>
+              <dt class="label">{item.label}</dt>
+              <dd>
+                {item.value}
+                {item.flag && <span class="tbd"> [{item.flag}]</span>}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="section">
+      <div class="container case-body">
+        <div class="grid case-row">
+          <h2 class="label">Challenge</h2>
+          <p class="case-row__text">{project.challenge}</p>
+        </div>
+        <div class="grid case-row">
+          <h2 class="label">System architecture</h2>
+          <div class="case-row__text">
+            <p>{project.solution}</p>
+            <ol class="case-chain" aria-label="System components in scope">
+              {
+                project.scope
+                  .filter((s) => s.quantity)
+                  .map((s) => (
+                    <li>
+                      <span class="data">{s.quantity}</span>
+                      <span class="small muted">{s.item}</span>
+                    </li>
+                  ))
+              }
+            </ol>
+          </div>
+        </div>
+        <div class="grid case-row">
+          <h2 class="label">LINKWAVE scope</h2>
+          <ul class="case-row__list">
+            {
+              project.scope.map((s) => (
+                <li>
+                  <span>{s.item}</span>
+                  {s.quantity && <span class="data muted">{s.quantity}</span>}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class="grid case-row">
+          <h2 class="label">Engineering highlights</h2>
+          <ul class="case-row__list">
+            {
+              highlights.map((h) => (
+                <li>
+                  <span>
+                    {h.text}
+                    {isFlagged(h.status) && <span class="tbd"> [needs approval]</span>}
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class="grid case-row">
+          <h2 class="label">Delivery</h2>
+          <p class="case-row__text">{project.delivery}</p>
+        </div>
+      </div>
+    </section>
+
+    {
+      project.gallery.length > 0 && (
+        <section class="section section--tint" aria-label="Gallery">
+          <div class="container case-gallery">
+            {project.gallery.map((media) => (
+              <Figure
+                src={media.src}
+                alt={media.alt}
+                caption={media.caption}
+                sizes="(min-width: 90rem) 1360px, 100vw"
+              />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <section class="section">
+      <div class="container grid case-row case-row--plain">
+        <h2 class="label">Related systems</h2>
+        <ul class="case-row__list">
+          {
+            used.map((p) => (
+              <li>
+                <a href={`/products/${p.slug}/`}>
+                  <span>{p.name}</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+  </article>
+
+  <CtaBand
+    title="Planning something similar?"
+    copy="Share the load, rack count and site constraints. An engineer will respond with an architecture and the questions that need answering."
+    primary={cta.similar}
+  />
+</Base>
+
+<style>
+  .case-head {
+    padding-top: var(--space-8);
+  }
+  .case-head__eyebrow {
+    margin-top: clamp(2rem, 5vw, 4.5rem);
+    margin-bottom: var(--space-6);
+  }
+  .case-head .grid {
+    row-gap: var(--space-6);
+    align-items: end;
+  }
+  .case-head__title {
+    grid-column: 1 / span 7;
+  }
+  .case-head__summary {
+    grid-column: 8 / -1;
+  }
+  .case-head__flag {
+    margin-top: var(--space-6);
+  }
+  .case-head__media {
+    margin-top: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .case-data dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    margin: var(--space-12) 0 0;
+    border-top: 1px solid var(--border-strong);
+  }
+  .case-data dl > div {
+    padding: var(--space-4) var(--space-6) var(--space-6) 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .case-data dd {
+    margin-top: var(--space-2);
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .case-row {
+    row-gap: var(--space-4);
+    padding-block: var(--space-6) var(--space-16);
+    border-top: 1px solid var(--border-strong);
+  }
+  .case-row--plain {
+    padding-bottom: 0;
+  }
+  .case-row > h2 {
+    grid-column: 1 / span 3;
+    padding-top: 0.5em;
+  }
+  .case-row__text,
+  .case-row__list {
+    grid-column: 4 / span 8;
+  }
+  .case-row__text,
+  .case-row__text > p {
+    max-width: 34em;
+    font-size: var(--type-lead);
+    line-height: 1.45;
+  }
+  .case-row__list li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 1.125rem;
+  }
+  .case-row__list li:first-child {
+    padding-top: 0;
+  }
+  .case-row__list a {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    text-decoration: none;
+  }
+  .case-row__list a:hover {
+    color: var(--accent);
+  }
+  .case-row__list .data {
+    font-size: 1rem;
+    letter-spacing: 0;
+    line-height: inherit;
+  }
+
+  /* Scope shown as a connected chain: the diagram for this case. */
+  .case-chain {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: var(--space-8);
+    max-width: none;
+    border-top: 2px solid var(--accent);
+  }
+  .case-chain li {
+    position: relative;
+    flex: 1 1 7.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-4) 0 0;
+  }
+  .case-chain li::before {
+    content: '';
+    position: absolute;
+    top: -0.4375rem;
+    left: 0;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1.5px solid var(--accent);
+    background: var(--surface-primary);
+  }
+  .case-chain .data {
+    font-size: 1.75rem;
+  }
+
+  .case-gallery {
+    display: grid;
+    gap: var(--space-12);
+  }
+
+  @media (max-width: 61.99rem) {
+    .case-head__title,
+    .case-head__summary,
+    .case-row > h2,
+    .case-row__text,
+    .case-row__list {
+      grid-column: 1 / -1;
+    }
+    .case-row {
+      padding-bottom: var(--space-12);
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .case-head__media {
+      padding-inline: 0;
+    }
+    .case-head__media :global(figcaption) {
+      padding-inline: var(--gutter);
+    }
+    .case-data dl {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

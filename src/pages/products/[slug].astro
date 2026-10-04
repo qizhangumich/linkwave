@@ -1,0 +1,317 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '@/layouts/Base.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import Button from '@/components/Button.astro';
+import Figure from '@/components/Figure.astro';
+import MetricRail from '@/components/MetricRail.astro';
+import SectionHeader from '@/components/SectionHeader.astro';
+import SpecTable from '@/components/SpecTable.astro';
+import SystemDiagram from '@/components/SystemDiagram.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import { products } from '@/content/products';
+import { projects } from '@/content/projects';
+import { cta, site } from '@/content/site';
+import type { Product } from '@/content/types';
+
+export const getStaticPaths = (() =>
+  products
+    .filter((p) => p.publicationStatus === 'published')
+    .map((p) => ({ params: { slug: p.slug }, props: { product: p } }))) satisfies GetStaticPaths;
+
+interface Props {
+  product: Product;
+}
+const { product } = Astro.props;
+
+const related = projects.filter(
+  (p) =>
+    product.relatedProjects.includes(p.slug) &&
+    (site.previewUnapprovedProjects || p.publicationApproved),
+);
+const heroRatio =
+  product.hero.src.height > product.hero.src.width * 1.1
+    ? '4 / 5'
+    : `${product.hero.src.width} / ${product.hero.src.height}`;
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Products', href: '/products/' },
+  { label: product.name },
+];
+const url = new URL(`/products/${product.slug}/`, Astro.site).href;
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: `${site.name} ${product.name}`,
+    description: product.shortDescription,
+    category: product.category,
+    brand: { '@type': 'Brand', name: site.name },
+    url,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.label,
+      item: c.href ? new URL(c.href, Astro.site).href : url,
+    })),
+  },
+];
+---
+
+<Base
+  title={product.name}
+  description={product.shortDescription}
+  schema={schema}
+  ogImage={product.hero.src.src}
+>
+  <!-- 1–3 Identity, purpose, key metrics -->
+  <section class="phero">
+    <div class="container">
+      <Breadcrumb items={crumbs} />
+      <div class="grid phero__head">
+        <h1 class="h1 phero__title">{product.name}</h1>
+        <div class="phero__body">
+          <p class="lead">{product.shortDescription}</p>
+          <div class="phero__actions">
+            <Button href={cta.primary.href}>{cta.primary.label}</Button>
+            <Button href="#specifications" variant="secondary">Specifications</Button>
+          </div>
+        </div>
+      </div>
+      <div class="grid phero__view">
+        <Figure
+          class="phero__figure"
+          src={product.hero.src}
+          alt={product.hero.alt}
+          caption={product.hero.caption}
+          ratio={heroRatio}
+          sizes="(min-width: 62rem) 58vw, 100vw"
+          eager
+        />
+        <div class="phero__metrics">
+          <MetricRail metrics={product.keyMetrics} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Position in system architecture -->
+  <section class="section section--tint">
+    <div class="container">
+      <SectionHeader eyebrow="System role" title="Where it sits in the system." lead={product.systemRole} />
+      <SystemDiagram active={product.architectureNode} />
+    </div>
+  </section>
+
+  <!-- 6–7 Engineering highlights and views -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader eyebrow="Engineering highlights" title={product.differentiator} />
+      <dl class="highlights">
+        {
+          product.features.map((feature) => (
+            <div>
+              <dt>{feature.title}</dt>
+              <dd class="muted">{feature.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      {
+        product.gallery.length > 0 && (
+          <div class:list={['pgallery', `pgallery--${product.gallery.length}`]}>
+            {product.gallery.map((media) => (
+              <Figure
+                src={media.src}
+                alt={media.alt}
+                caption={media.caption}
+                ratio="4 / 3"
+                fit={media.kind === 'drawing' ? 'contain' : 'cover'}
+                sizes="(min-width: 62rem) 45vw, 100vw"
+              />
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- 8–12 Specifications -->
+  <section class="section section--tint" id="specifications">
+    <div class="container">
+      <SectionHeader
+        eyebrow="Technical specifications"
+        title="Specifications"
+        lead="SI units, with US customary equivalents where useful. Values are for the reference configurations shown; project units are sized to the load."
+      />
+      <SpecTable
+        groups={product.specGroups}
+        configurations={product.configurations}
+        footnotes={product.specFootnotes}
+      />
+    </div>
+  </section>
+
+  <!-- 13–15 Applications, projects, documentation -->
+  <section class="section">
+    <div class="container grid pmeta">
+      <div class="pmeta__col">
+        <h2 class="label">Applications</h2>
+        <ul class="pmeta__list">
+          {product.applications.map((app) => <li>{app}</li>)}
+        </ul>
+      </div>
+      <div class="pmeta__col">
+        <h2 class="label">Reference projects</h2>
+        <ul class="pmeta__list">
+          {
+            related.map((p) => (
+              <li>
+                <a href={`/projects/${p.slug}/`}>
+                  <span>{p.title}</span>
+                  <span class="small muted">{p.country}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="pmeta__col">
+        <h2 class="label">Documentation</h2>
+        <p class="muted pmeta__text">
+          Datasheets, dimensional drawings, P&amp;IDs and electrical schematics are issued per project.
+        </p>
+        <Button variant="text" href={cta.package.href}>{cta.package.label}</Button>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Sizing this system for your load?"
+    copy="Send the heat load, flow and temperature requirements. An engineer will respond with a configuration and the open questions."
+  />
+</Base>
+
+<style>
+  .phero {
+    padding-block: var(--space-8) var(--section-pad);
+  }
+  .phero__head {
+    row-gap: var(--space-8);
+    align-items: end;
+    margin-block: clamp(2rem, 5vw, 4.5rem) clamp(2.5rem, 5vw, 4.5rem);
+  }
+  .phero__title {
+    grid-column: 1 / span 7;
+  }
+  .phero__body {
+    grid-column: 8 / -1;
+  }
+  .phero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+  .phero__view {
+    row-gap: var(--space-12);
+    align-items: start;
+  }
+  .phero__view :global(.phero__figure) {
+    grid-column: 1 / span 7;
+  }
+  .phero__metrics {
+    grid-column: 9 / -1;
+  }
+  /* Beside the product view the key figures read as one vertical instrument column. */
+  @media (min-width: 62rem) {
+    .phero__metrics :global(.metric-rail__list) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .phero__metrics :global(.metric + .metric) {
+      padding-left: 0;
+      border-left: 0;
+    }
+  }
+
+  .highlights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    margin: 0;
+  }
+  .highlights > div {
+    padding-block: var(--space-6) var(--space-8);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .highlights dt {
+    margin-bottom: var(--space-3);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .highlights dd {
+    max-width: 26em;
+  }
+
+  .pgallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-12) var(--col-gap);
+    margin-top: clamp(3rem, 6vw, 6rem);
+  }
+
+  .pmeta {
+    row-gap: var(--space-12);
+  }
+  .pmeta__col {
+    grid-column: span 4;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-strong);
+  }
+  .pmeta__list {
+    width: 100%;
+  }
+  .pmeta__list li {
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 1.125rem;
+  }
+  .pmeta__list a {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+  }
+  .pmeta__list a:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 61.99rem) {
+    .phero__title,
+    .phero__body,
+    .phero__metrics,
+    .phero__view :global(.phero__figure) {
+      grid-column: 1 / -1;
+    }
+    .highlights {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .pmeta__col {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .highlights,
+    .pgallery {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

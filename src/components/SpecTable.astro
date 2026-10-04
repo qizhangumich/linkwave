@@ -1,0 +1,171 @@
+---
+import type { SpecGroup } from '@/content/types';
+import { isFlagged, isPublic } from '@/lib/publish';
+
+interface Props {
+  groups: SpecGroup[];
+  configurations: string[];
+  footnotes?: string[];
+}
+const { groups, configurations, footnotes = [] } = Astro.props;
+const multi = configurations.length > 1;
+
+const visibleGroups = groups
+  .map((g) => ({ ...g, rows: g.rows.filter((r) => isPublic(r.status)) }))
+  .filter((g) => g.rows.length > 0);
+---
+
+<div class="spec">
+  {
+    visibleGroups.map((group) => (
+      <section class="spec__group grid" aria-labelledby={`spec-${group.group}`}>
+        <h3 class="label spec__group-name" id={`spec-${group.group}`}>
+          {group.group}
+        </h3>
+        <table class:list={['spec__table', multi && 'spec__table--multi']}>
+          {multi && (
+            <thead>
+              <tr>
+                <th scope="col">
+                  <span class="visually-hidden">Parameter</span>
+                </th>
+                {configurations.map((c) => (
+                  <th scope="col" class="label">
+                    {c}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+          )}
+          <tbody>
+            {group.rows.map((row) => (
+              <tr class:list={[isFlagged(row.status) && 'spec__row--flagged']}>
+                <th scope="row">
+                  {row.label}
+                  {row.note && <span class="spec__note">{row.note}</span>}
+                </th>
+                {row.values.map((value, i) => (
+                  <td data-config={multi ? configurations[i] : undefined}>
+                    <span class:list={['spec__value', isFlagged(row.status) && 'tbd']}>{value}</span>
+                    {row.us?.[i] && <span class="spec__us">{row.us[i]}</span>}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    ))
+  }
+  {footnotes.map((note) => <p class="spec__footnote small muted">{note}</p>)}
+</div>
+
+<style>
+  .spec__group {
+    padding-block: var(--space-6) var(--space-12);
+    border-top: 1px solid var(--border-strong);
+  }
+  .spec__group-name {
+    grid-column: 1 / span 3;
+    padding-top: 0.9rem;
+  }
+  .spec__table {
+    grid-column: 4 / -1;
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .spec__table th,
+  .spec__table td {
+    padding: 0.8rem 1rem 0.8rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+    text-align: left;
+    vertical-align: top;
+    font-weight: 400;
+  }
+  .spec__table thead th {
+    padding-top: 0.9rem;
+    border-bottom-color: var(--border-strong);
+  }
+  .spec__table tbody th {
+    width: 34%;
+    color: var(--text-secondary);
+  }
+  .spec__table--multi td {
+    width: 33%;
+  }
+  .spec__value {
+    font-weight: 500;
+  }
+  .spec__us,
+  .spec__note {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+  }
+  .spec__footnote {
+    max-width: 52em;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-strong);
+  }
+
+  /* Phones: instrument-style data blocks instead of a squeezed table (spec §39.5). */
+  @media (max-width: 47.99rem) {
+    .spec__group > * {
+      grid-column: 1 / -1;
+    }
+    .spec__group {
+      padding-bottom: var(--space-8);
+    }
+    .spec__group-name {
+      padding: 0 0 var(--space-3);
+    }
+    .spec__table thead {
+      display: none;
+    }
+    .spec__table,
+    .spec__table tbody,
+    .spec__table tr,
+    .spec__table th,
+    .spec__table td {
+      display: block;
+      width: auto;
+    }
+    .spec__table tr {
+      padding-block: var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .spec__table tbody th,
+    .spec__table td {
+      padding: 0;
+      border: 0;
+    }
+    .spec__table tbody th {
+      width: auto;
+      font-family: var(--font-mono);
+      font-size: var(--type-label);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .spec__table td {
+      margin-top: var(--space-2);
+    }
+    .spec__value {
+      font-size: 1.375rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+    .spec__table td[data-config]::before {
+      content: attr(data-config);
+      display: block;
+      margin-top: var(--space-3);
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+    }
+  }
+  @media (min-width: 48rem) and (max-width: 61.99rem) {
+    .spec__group > * {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

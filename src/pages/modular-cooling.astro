@@ -1,0 +1,234 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import DefGrid from '@/components/DefGrid.astro';
+import Figure from '@/components/Figure.astro';
+import MetricRail from '@/components/MetricRail.astro';
+import PageHero from '@/components/PageHero.astro';
+import SectionHeader from '@/components/SectionHeader.astro';
+import { modularPage as page } from '@/content/pages';
+import { cta } from '@/content/site';
+
+import pumpRender from '@/assets/images/pump-station-render.jpg';
+import sgPump from '@/assets/images/sg-pump-station.jpg';
+import usIntegration from '@/assets/images/us-2500kw-integration.jpg';
+
+const images = { sgPump, usIntegration };
+const crumbs = [{ label: 'Home', href: '/' }, { label: 'Modular cooling' }];
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<Base title="Modular cooling" description={page.metaDescription} ogImage={pumpRender.src}>
+  <PageHero crumbs={crumbs} eyebrow={page.eyebrow} title={page.title} lead={page.lead}>
+    <Fragment slot="actions">
+      <Button href={cta.primary.href}>Discuss Your Project</Button>
+      <Button href="#scope" variant="secondary">Integrated scope</Button>
+    </Fragment>
+    <Figure
+      src={pumpRender}
+      alt={page.heroAlt}
+      caption={page.heroCaption}
+      ratio="21 / 10"
+      mobileRatio="4 / 3"
+      position="50% 55%"
+      sizes="(min-width: 90rem) 1360px, 100vw"
+      eager
+    />
+  </PageHero>
+
+  <!-- 1 Customer problem -->
+  <section class="section section--tint">
+    <div class="container">
+      <SectionHeader eyebrow="The problem" title={page.problem.title} />
+      <DefGrid items={page.problem.items} />
+    </div>
+  </section>
+
+  <!-- 2 Reference architecture -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader eyebrow="Reference architecture" title={page.forms.title} />
+      <div class="forms">
+        {
+          page.forms.items.map((form) => (
+            <article class="form">
+              <Figure
+                src={images[form.image]}
+                alt={form.alt}
+                caption={form.caption}
+                ratio="3 / 2"
+                sizes="(min-width: 62rem) 45vw, 100vw"
+              />
+              <h3 class="h3">{form.name}</h3>
+              <p class="muted">{form.body}</p>
+              <Button variant="text" href={form.href}>{form.link}</Button>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 3–4 Factory-integrated scope and interfaces -->
+  <section class="section section--tint" id="scope">
+    <div class="container">
+      <SectionHeader eyebrow="Factory-integrated scope" title={page.scope.title} />
+      <DefGrid items={page.scope.items} numbered />
+      <div class="grid interfaces">
+        <h3 class="label interfaces__label">System interfaces</h3>
+        <dl class="interfaces__list">
+          {
+            page.interfaces.map((item) => (
+              <div>
+                <dt class="muted">{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5–7 Capacity, redundancy, controls -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader
+        eyebrow="Configuration"
+        title="Sized to the load, configured to the redundancy requirement."
+      />
+      <MetricRail metrics={page.configuration} />
+      <div class="redundancy">
+        <DefGrid items={page.redundancy} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 8–11 FAT, logistics, site integration, commissioning -->
+  <section class="section inverse">
+    <div class="container">
+      <SectionHeader eyebrow="Delivery" title="From engineering to commissioning." />
+      <ol class="msteps">
+        {
+          page.steps.map((step, i) => (
+            <li class="grid">
+              <span class="label msteps__index">{pad(i + 1)}</span>
+              <h3 class="msteps__name">{step.name}</h3>
+              <p class="muted msteps__body">{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- 12 Inquiry -->
+  <CtaBand
+    title="Considering a prefabricated cooling plant?"
+    copy="Send the capacity per module, site constraints and connection points. An engineer will respond with a configuration and the open questions."
+    primary={{ label: 'Discuss Your Project', href: cta.primary.href }}
+  />
+</Base>
+
+<style>
+  .forms {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-16) var(--col-gap);
+  }
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .form :global(.figure) {
+    width: 100%;
+    margin-bottom: var(--space-2);
+  }
+  .form p {
+    max-width: 32em;
+  }
+
+  .interfaces {
+    row-gap: var(--space-4);
+    margin-top: clamp(2rem, 4vw, 4rem);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border-strong);
+  }
+  .interfaces__label {
+    grid-column: 1 / span 3;
+    padding-top: 0.9rem;
+  }
+  .interfaces__list {
+    grid-column: 4 / -1;
+    margin: 0;
+  }
+  .interfaces__list > div {
+    display: grid;
+    grid-template-columns: 34% minmax(0, 1fr);
+    gap: var(--space-4);
+    padding-block: 0.8rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .interfaces__list dd {
+    font-weight: 500;
+  }
+
+  .redundancy {
+    margin-top: clamp(3rem, 6vw, 6rem);
+  }
+
+  .msteps {
+    border-top: 1px solid var(--border-subtle);
+  }
+  .msteps li {
+    row-gap: var(--space-2);
+    align-items: baseline;
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .msteps__index {
+    grid-column: 1 / span 1;
+    color: var(--accent);
+  }
+  .msteps__name {
+    grid-column: 2 / span 4;
+    font-size: var(--type-h3);
+  }
+  .msteps__body {
+    grid-column: 7 / span 6;
+    font-size: 1.125rem;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 61.99rem) {
+    .interfaces__label,
+    .interfaces__list {
+      grid-column: 1 / -1;
+    }
+    .msteps__name {
+      grid-column: 2 / -1;
+    }
+    .msteps__body {
+      grid-column: 2 / -1;
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .forms {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .interfaces__list > div {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.15rem;
+    }
+    .msteps__index {
+      grid-column: 1 / span 2;
+    }
+    .msteps__name,
+    .msteps__body {
+      grid-column: 3 / -1;
+    }
+  }
+</style>

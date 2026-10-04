@@ -1,0 +1,63 @@
+---
+interface Props {
+  items: { label: string; href?: string; meta?: string }[];
+}
+const { items } = Astro.props;
+---
+
+<ul class="link-list">
+  {
+    items.map((item) => (
+      <li>
+        {item.href ? (
+          <a href={item.href}>
+            <span>{item.label}</span>
+            {item.meta && <span class="small muted">{item.meta}</span>}
+            <span class="link-list__arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
+        ) : (
+          <div>
+            <span>{item.label}</span>
+            {item.meta && <span class="small muted">{item.meta}</span>}
+          </div>
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .link-list {
+    width: 100%;
+    border-top: 1px solid var(--border-strong);
+  }
+  .link-list li {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .link-list a,
+  .link-list div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.1rem var(--space-4);
+    padding-block: var(--space-3);
+    font-size: 1.125rem;
+    text-decoration: none;
+  }
+  .link-list .small {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .link-list__arrow {
+    grid-column: 2;
+    grid-row: 1;
+    transition: transform var(--motion-fast) var(--ease);
+  }
+  .link-list a:hover {
+    color: var(--accent);
+  }
+  .link-list a:hover .link-list__arrow {
+    transform: translateX(3px);
+  }
+</style>
