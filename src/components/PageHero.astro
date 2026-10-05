@@ -49,6 +49,23 @@ const { crumbs, eyebrow, title, lead } = Astro.props;
   .page-hero__title {
     grid-column: 1 / span 7;
   }
+  :global(.js) .page-hero__eyebrow,
+  :global(.js) .page-hero__title,
+  :global(.js) .page-hero__body {
+    animation: fade-up 800ms var(--ease-out) both;
+  }
+  :global(.js) .page-hero__title {
+    animation-delay: 70ms;
+  }
+  :global(.js) .page-hero__body {
+    animation-delay: 200ms;
+  }
+  :global(.js) .page-hero__head ~ :global(.figure) :global(.figure__frame) {
+    animation: unveil 1100ms var(--ease-out) 320ms both;
+  }
+  :global(.js) .page-hero__head ~ :global(.figure) :global(.figure__frame img) {
+    animation: settle 1700ms var(--ease-out) 320ms both;
+  }
   .page-hero__body {
     grid-column: 8 / -1;
   }

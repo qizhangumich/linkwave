@@ -29,14 +29,19 @@
   --font-sans: 'Geist Variable', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-  --type-display: clamp(2.75rem, 7.2vw, 7.25rem);
-  --type-h1: clamp(2.5rem, 5vw, 5rem);
-  --type-h2: clamp(2rem, 3.8vw, 3.75rem);
-  --type-h3: clamp(1.375rem, 2.2vw, 2rem);
-  --type-lead: clamp(1.125rem, 1.5vw, 1.375rem);
+  --type-display: clamp(2.75rem, 7.6vw, 7.75rem);
+  --type-h1: clamp(2.375rem, 5vw, 5rem);
+  --type-h2: clamp(1.875rem, 3.7vw, 3.5rem);
+  --type-h3: clamp(1.3125rem, 2vw, 1.875rem);
+  --type-lead: clamp(1.125rem, 1.45vw, 1.3125rem);
+
+  /* Large type is set lighter and tighter; small type slightly open. */
+  --weight-display: 460;
+  --weight-heading: 500;
+  --weight-data: 380;
   --type-body: 1.0625rem;
   --type-small: 0.875rem;
-  --type-label: 0.75rem;
+  --type-label: 0.6875rem;
   --type-data-xl: clamp(2.75rem, 5.6vw, 5.5rem);
   --type-data-l: clamp(1.75rem, 2.6vw, 2.5rem);
 
@@ -56,7 +61,8 @@
   --content-max: 85rem; /* 1360px */
   --gutter: clamp(1.25rem, 4vw, 3.5rem);
   --col-gap: clamp(1rem, 2vw, 2rem);
-  --section-pad: clamp(4.5rem, 9vw, 9.5rem);
+  --section-pad: clamp(5rem, 10vw, 10.5rem);
+  --header-gap: clamp(2.75rem, 5.5vw, 5.5rem);
   --header-h: 4.5rem;
 
   /* radius */
@@ -66,6 +72,8 @@
   /* motion */
   --motion-fast: 160ms;
   --motion-standard: 240ms;
-  --motion-editorial: 560ms;
+  --motion-editorial: 640ms;
+  --motion-reveal: 900ms;
   --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }

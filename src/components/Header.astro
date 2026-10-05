@@ -40,14 +40,14 @@ import { cta, nav, site } from '@/content/site';
     <nav class="container" aria-label="Mobile">
       <ul>
         {
-          nav.map((item) => (
-            <li>
+          nav.map((item, n) => (
+            <li style={`--n: ${n}`}>
               <a href={item.href}>{item.label}</a>
             </li>
           ))
         }
       </ul>
-      <Button href={cta.primary.href}>{cta.primary.label}</Button>
+      <Button href={cta.primary.href} style={`--n: ${nav.length}`}>{cta.primary.label}</Button>
     </nav>
   </div>
 </header>
@@ -57,7 +57,17 @@ import { cta, nav, site } from '@/content/site';
   const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
   const sheet = document.getElementById('mobile-nav');
 
-  const onScroll = () => header?.toggleAttribute('data-scrolled', window.scrollY > 8);
+  // On phones the bar steps aside while reading down and returns on the first scroll up.
+  let lastY = window.scrollY;
+  const onScroll = () => {
+    const y = window.scrollY;
+    header?.toggleAttribute('data-scrolled', y > 8);
+    const open = toggle?.getAttribute('aria-expanded') === 'true';
+    if (Math.abs(y - lastY) > 6) {
+      header?.toggleAttribute('data-away', y > lastY && y > 320 && !open);
+      lastY = y;
+    }
+  };
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -91,6 +101,27 @@ import { cta, nav, site } from '@/content/site';
   .header[data-scrolled] {
     border-bottom-color: var(--border-subtle);
   }
+  /* Reading position, drawn by the scroll itself where the browser supports it. */
+  @supports (animation-timeline: scroll()) {
+    .header::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 -1px;
+      height: 2px;
+      background: var(--accent);
+      transform-origin: left;
+      animation: header-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+  @keyframes header-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
   .header__inner {
     display: flex;
     align-items: center;
@@ -111,7 +142,8 @@ import { cta, nav, site } from '@/content/site';
   .header__nav a {
     position: relative;
     padding-block: 0.5rem;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
+    letter-spacing: -0.005em;
     color: var(--text-secondary);
     text-decoration: none;
     transition: color var(--motion-fast) var(--ease);
@@ -186,6 +218,28 @@ import { cta, nav, site } from '@/content/site';
   .mobile-nav li {
     border-bottom: 1px solid var(--border-subtle);
   }
+  .mobile-nav:not([hidden]) {
+    animation: sheet-in 420ms var(--ease-out) both;
+  }
+  .mobile-nav:not([hidden]) li,
+  .mobile-nav:not([hidden]) :global(.btn) {
+    animation: sheet-item 520ms var(--ease-out) both;
+    animation-delay: calc(60ms + var(--n, 0) * 45ms);
+  }
+  @keyframes sheet-in {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+  @keyframes sheet-item {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+  }
   .mobile-nav li a {
     display: block;
     padding-block: 1.125rem;
@@ -204,6 +258,14 @@ import { cta, nav, site } from '@/content/site';
     }
     .header__toggle {
       display: block;
+    }
+    .header {
+      transition:
+        border-color var(--motion-standard) var(--ease),
+        transform 320ms var(--ease);
+    }
+    .header[data-away] {
+      transform: translateY(-101%);
     }
   }
   @media (min-width: 66rem) {

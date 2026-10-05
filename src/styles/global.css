@@ -18,7 +18,8 @@ body {
   font-family: var(--font-sans);
   font-size: var(--type-body);
   line-height: 1.55;
-  font-feature-settings: 'ss01', 'cv11';
+  font-kerning: normal;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -57,10 +58,14 @@ h1,
 h2,
 h3,
 h4 {
-  font-weight: 500;
+  font-weight: var(--weight-heading);
   letter-spacing: -0.025em;
   line-height: 1.04;
   text-wrap: balance;
+}
+::selection {
+  background: var(--accent);
+  color: #fff;
 }
 p {
   text-wrap: pretty;
@@ -143,26 +148,33 @@ textarea {
 /* ---------- type ---------- */
 .display {
   font-size: var(--type-display);
-  letter-spacing: -0.04em;
-  line-height: 0.96;
+  font-weight: var(--weight-display);
+  letter-spacing: -0.048em;
+  line-height: 0.93;
 }
 .h1 {
   font-size: var(--type-h1);
-  letter-spacing: -0.035em;
+  font-weight: var(--weight-display);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
 }
 .h2 {
   font-size: var(--type-h2);
-  letter-spacing: -0.03em;
+  font-weight: var(--weight-display);
+  letter-spacing: -0.035em;
+  line-height: 1.02;
 }
 .h3 {
   font-size: var(--type-h3);
-  line-height: 1.12;
+  letter-spacing: -0.022em;
+  line-height: 1.14;
 }
 .lead {
   font-size: var(--type-lead);
-  line-height: 1.45;
+  line-height: 1.42;
+  letter-spacing: -0.012em;
   color: var(--text-secondary);
-  max-width: 38em;
+  max-width: 34em;
 }
 .muted {
   color: var(--text-secondary);
@@ -174,15 +186,15 @@ textarea {
   font-family: var(--font-mono);
   font-size: var(--type-label);
   font-weight: 500;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-tertiary);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 .data {
   font-variant-numeric: tabular-nums lining-nums;
-  font-weight: 400;
-  letter-spacing: -0.04em;
+  font-weight: var(--weight-data);
+  letter-spacing: -0.045em;
   line-height: 1;
 }
 .data--xl {
@@ -191,10 +203,16 @@ textarea {
 .data--l {
   font-size: var(--type-data-l);
 }
+/* Units sit at cap height beside the figure, as on an instrument face. */
 .unit {
-  font-size: 0.42em;
-  letter-spacing: 0;
-  margin-left: 0.18em;
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: max(0.26em, 0.625rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: top;
+  margin: 0.5em 0 0 0.4em;
   color: var(--text-secondary);
 }
 .prose > * + * {
@@ -211,15 +229,142 @@ textarea {
   color: var(--error);
 }
 
-/* ---------- motion ---------- */
+/* ---------- motion ----------
+   Motion marks arrival and sequence, nothing else. Everything below is gated on `.js`
+   (content is fully visible without scripts) and switched off for reduced motion. */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+  animation-timing-function: var(--ease);
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+}
+@keyframes unveil {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes settle {
+  from {
+    transform: scale(1.06);
+  }
+}
+
+/* Scroll reveals: set by src/scripts/motion.ts only on elements that start below the fold. */
+.js [data-reveal] {
+  transition:
+    opacity var(--motion-editorial) var(--ease) calc(var(--i, 0) * 80ms),
+    transform var(--motion-reveal) var(--ease-out) calc(var(--i, 0) * 80ms);
+}
+.js [data-reveal='up']:not(.is-in) {
+  opacity: 0;
+  transform: translateY(1.5rem);
+}
+.js [data-reveal='figure'] .figure__frame {
+  transition: clip-path var(--motion-reveal) var(--ease-out) calc(var(--i, 0) * 80ms);
+}
+.js [data-reveal='figure'] .figure__frame img {
+  transition: transform 1400ms var(--ease-out) calc(var(--i, 0) * 80ms);
+}
+.js [data-reveal='figure'] .figure__caption {
+  transition: opacity var(--motion-editorial) var(--ease) 320ms;
+}
+.js [data-reveal='figure']:not(.is-in) .figure__frame {
+  clip-path: inset(0 0 100% 0);
+}
+.js [data-reveal='figure']:not(.is-in) .figure__frame img {
+  transform: scale(1.06);
+}
+.js [data-reveal='figure']:not(.is-in) .figure__caption {
+  opacity: 0;
+}
+/* Rules draw from the left as their section arrives. */
+.js [data-reveal='rule']::before {
+  transition: transform 1100ms var(--ease-out);
+}
+.js [data-reveal='rule']:not(.is-in)::before {
+  transform: scaleX(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ---------- rails: on phones, sibling chapters become a swipeable row ---------- */
+.rail-meter {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .rail {
+    display: flex !important;
+    gap: var(--space-4);
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+  .rail > * {
+    flex: 0 0 86%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  .rail-meter {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+  .rail-meter__track {
+    position: relative;
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+  .rail-meter__bar {
+    position: absolute;
+    inset: -0.5px auto -0.5px 0;
+    width: calc(100% / var(--count, 1));
+    background: var(--text-primary);
+    transform: translateX(calc(var(--at, 0) * 100%));
+    transition: transform var(--motion-standard) var(--ease);
   }
 }
 

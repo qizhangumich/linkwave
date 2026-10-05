@@ -62,7 +62,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
         <div class="grid hero__head">
           <p class="label hero__eyebrow">{hero.eyebrow}</p>
           <h1 class="display hero__title">
-            {hero.title.map((line) => <span>{line} </span>)}
+            {
+              hero.title.map((line, i) => (
+                <span class="hero__line">
+                  <span style={`--n: ${i}`}>{line} </span>
+                </span>
+              ))
+            }
           </h1>
           <div class="hero__body">
             <p class="lead">{hero.copy}</p>
@@ -124,7 +130,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
               ))
             }
           </div>
-          <div class="solutions__panels">
+          <div class="solutions__panels rail" data-rail>
             {
               solutions.map((s, i) => (
                 <article
@@ -190,7 +196,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <section class="section" id="products" data-chapter="products">
       <div class="container">
         <SectionHeader eyebrow="Products" title="Major equipment families." />
-        <div class="products">
+        <div class="products rail" data-rail>
           {
             products.map((p) => (
               <article class="product">
@@ -459,7 +465,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 <style>
   /* ---------- hero ---------- */
   .hero {
-    padding-top: clamp(2.5rem, 6vw, 6rem);
+    padding-top: clamp(2.5rem, 6.5vw, 7rem);
   }
   .hero__head {
     row-gap: var(--space-8);
@@ -471,8 +477,37 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .hero__title {
     grid-column: 1 / span 8;
   }
-  .hero__title span {
+  .hero__line {
     display: block;
+    overflow: hidden;
+    /* room for descenders inside the mask */
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+  .hero__line > span {
+    display: block;
+  }
+  /* One orchestrated entrance: headline, then copy, then the system itself. */
+  :global(.js) .hero__line > span {
+    animation: rise 1100ms var(--ease-out) both;
+    animation-delay: calc(80ms + var(--n) * 110ms);
+  }
+  :global(.js) .hero__eyebrow,
+  :global(.js) .hero__body {
+    animation: fade-up 800ms var(--ease-out) both;
+  }
+  :global(.js) .hero__body {
+    animation-delay: 420ms;
+  }
+  :global(.js) .hero__media :global(.figure__frame) {
+    animation: unveil 1200ms var(--ease-out) 520ms both;
+  }
+  :global(.js) .hero__media :global(.figure__frame img) {
+    animation: settle 1800ms var(--ease-out) 520ms both;
+  }
+  :global(.js) .hero__media :global(.figure__caption),
+  :global(.js) .proof {
+    animation: fade-up 800ms var(--ease-out) 1100ms both;
   }
   .hero__body {
     grid-column: 9 / -1;
@@ -485,11 +520,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
     margin-top: var(--space-8);
   }
   .hero__media {
-    margin-top: clamp(2.5rem, 5vw, 5rem);
+    margin-top: clamp(2.5rem, 5.5vw, 5.5rem);
   }
 
   .proof {
-    padding-block: clamp(3rem, 6vw, 6rem) var(--section-pad);
+    padding-block: clamp(3rem, 6vw, 6.5rem) var(--section-pad);
   }
 
   /* ---------- solutions ---------- */
@@ -561,6 +596,16 @@ const pad = (n: number) => String(n).padStart(2, '0');
     :global(.js) .solution:not([data-active]) {
       display: none;
     }
+    :global(.js) .solution[data-active] :global(.figure__frame) {
+      animation: unveil 700ms var(--ease-out) both;
+    }
+    :global(.js) .solution[data-active] :global(.figure__frame img) {
+      animation: settle 1200ms var(--ease-out) both;
+    }
+    :global(.js) .solution[data-active] .solution__text,
+    :global(.js) .solution[data-active] :global(.btn) {
+      animation: fade-up 520ms var(--ease-out) 120ms both;
+    }
   }
   @media (max-width: 61.99rem) {
     .solutions__list {
@@ -570,6 +615,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       grid-column: 1 / -1;
       display: grid;
       gap: var(--space-16);
+      min-width: 0;
     }
     .solution__name {
       display: block;
@@ -672,7 +718,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .products {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(3rem, 6vw, 6rem) var(--col-gap);
+    gap: clamp(3.5rem, 7vw, 7rem) var(--col-gap);
   }
   .product__media {
     display: block;
@@ -717,10 +763,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     .products {
       grid-template-columns: minmax(0, 1fr);
     }
-    /* Phone chapters: one image, one figure, one action. */
-    .product__media {
-      margin-inline: calc(-1 * var(--gutter));
-    }
+    /* Phone chapters: one image, one figure, one action, swiped sideways. */
     .product__body {
       padding-right: 0;
     }
@@ -1031,6 +1074,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
     }
     .hero .lead {
       font-size: 1.0625rem;
+    }
+    .hero__title {
+      font-size: clamp(2.75rem, 11.4vw, 4rem);
+    }
+    .hero__head {
+      row-gap: var(--space-6);
     }
   }
   @media (max-width: 61.99rem) {

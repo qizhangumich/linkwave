@@ -19,18 +19,26 @@ const { eyebrow, title, lead, as: Tag = 'h2', size = 'h2' } = Astro.props;
 
 <style>
   .section-header {
+    position: relative;
     row-gap: var(--space-6);
     padding-top: var(--space-6);
-    margin-bottom: clamp(2.5rem, 5vw, 5rem);
-    border-top: 1px solid var(--border-strong);
+    margin-bottom: var(--header-gap);
+  }
+  .section-header::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: var(--border-strong);
+    transform-origin: left;
   }
   .section-header__eyebrow {
     grid-column: 1 / span 3;
-    padding-top: 0.5em;
+    padding-top: 0.75em;
   }
   .section-header__title {
     grid-column: 4 / span 8;
-    max-width: 17em;
+    max-width: 15em;
   }
   .section-header__lead {
     grid-column: 4 / span 6;

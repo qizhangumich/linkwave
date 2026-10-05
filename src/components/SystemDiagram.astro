@@ -195,6 +195,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
     border-color: var(--accent);
     color: var(--accent);
   }
+  :global(.js) .node__panel:not([hidden]) > * {
+    animation: fade-up 420ms var(--ease-out) both;
+  }
+  :global(.js) .node__panel:not([hidden]) > * + * {
+    animation-delay: 70ms;
+  }
   .node__panel-body p {
     max-width: 36em;
     color: var(--text-secondary);
